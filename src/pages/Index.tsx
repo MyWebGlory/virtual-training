@@ -53,15 +53,15 @@ const FloatingBlobs = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div
       className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-20 animate-float-slow"
-      style={{ background: "radial-gradient(circle, hsl(216 100% 50% / 0.3), transparent 70%)" }}
+      style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.25), transparent 70%)" }}
     />
     <div
       className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full opacity-15 animate-float"
-      style={{ background: "radial-gradient(circle, hsl(260 80% 55% / 0.25), transparent 70%)", animationDelay: "2s" }}
+      style={{ background: "radial-gradient(circle, hsl(24 85% 48% / 0.2), transparent 70%)", animationDelay: "2s" }}
     />
     <div
       className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] rounded-full opacity-10 animate-float-slow"
-      style={{ background: "radial-gradient(circle, hsl(216 100% 50% / 0.2), transparent 70%)", animationDelay: "4s" }}
+      style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.15), transparent 70%)", animationDelay: "4s" }}
     />
   </div>
 );
@@ -77,11 +77,11 @@ const ConnectingLine = () => {
       <svg width="2" height="80" viewBox="0 0 2 80" className="overflow-visible">
         <motion.line
           x1="1" y1="0" x2="1" y2="80"
-          stroke="hsl(216, 100%, 50%)"
+          stroke="hsl(38, 90%, 55%)"
           strokeWidth="2"
           strokeLinecap="round"
           style={{ pathLength }}
-          className="drop-shadow-[0_0_8px_hsl(216,100%,50%)]"
+          className="drop-shadow-[0_0_8px_hsl(38,90%,55%)]"
         />
       </svg>
     </div>
@@ -93,7 +93,7 @@ const StickyBar = () => (
   <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
       <img src={vmLogo} alt="Virtual Producers" className="h-8" />
-      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-[0_0_20px_hsl(216,100%,50%/0.3)]">
+      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-[0_0_20px_hsl(38,90%,55%/0.3)]">
         <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
           Book Your Free Strategy Call
         </a>
@@ -120,7 +120,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
       <div
         className="absolute inset-0 opacity-40"
-        style={{ background: "radial-gradient(ellipse at 50% 30%, hsl(216 100% 50% / 0.15), transparent 60%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 30%, hsl(38 90% 55% / 0.12), transparent 60%)" }}
       />
 
       {/* Grid pattern */}
@@ -168,7 +168,7 @@ const Hero = () => {
           <Button
             asChild
             size="lg"
-            className="group bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-7 text-lg font-bold shadow-[0_0_30px_hsl(216,100%,50%/0.4)] hover:shadow-[0_0_50px_hsl(216,100%,50%/0.6)] transition-shadow"
+            className="group bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-7 text-lg font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.4)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.6)] transition-shadow"
           >
             <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
               Book a Free Strategy Call
@@ -191,7 +191,7 @@ const Hero = () => {
               key={stat.label}
               className="glass rounded-xl px-6 py-4 text-center min-w-[140px]"
             >
-              <div className="text-2xl font-extrabold gradient-text-blue">{stat.num}</div>
+              <div className="text-2xl font-extrabold gradient-text-accent">{stat.num}</div>
               <div className="mt-1 text-xs text-muted-foreground tracking-wide uppercase">{stat.label}</div>
             </div>
           ))}
@@ -273,7 +273,7 @@ const ProblemSection = () => (
       variants={stagger}
     >
       <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
-        The Hidden Cost of <span className="gradient-text-blue">DIY Production</span>
+        The Hidden Cost of <span className="gradient-text-accent">DIY Production</span>
       </motion.h2>
       <div className="mt-16 grid gap-8 md:grid-cols-3 relative">
         {/* Connecting line between cards (desktop) */}
@@ -290,7 +290,7 @@ const ProblemSection = () => (
           <motion.div
             key={p.title}
             variants={fadeUp}
-            className="relative group glass rounded-2xl p-8 transition-all duration-500 hover:border-primary/40 hover:-translate-y-2 hover:shadow-[0_0_40px_hsl(216,100%,50%/0.15)] z-10"
+            className="relative group glass rounded-2xl p-8 transition-all duration-500 hover:border-primary/40 hover:-translate-y-2 hover:shadow-[0_0_40px_hsl(38,90%,55%/0.15)] z-10"
           >
             {/* Large step number */}
             <span className="absolute top-4 right-6 text-7xl font-extrabold text-primary/[0.07] select-none">{p.num}</span>
@@ -333,7 +333,7 @@ const ShiftSection = () => {
             </motion.p>
             <motion.h2 variants={fadeUp} className="text-4xl font-extrabold sm:text-5xl leading-tight">
               What If Technology Was Never a{" "}
-              <span className="gradient-text-blue">Barrier</span> to Learning?
+              <span className="gradient-text-accent">Barrier</span> to Learning?
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground leading-relaxed">
               When a dedicated production team handles the platform, your facilitators do what they do best — teach, engage, and lead.
@@ -345,7 +345,7 @@ const ShiftSection = () => {
           </div>
           <motion.div
             variants={fadeUp}
-            className="overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_30px_hsl(216,100%,50%/0.15)]"
+            className="overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_30px_hsl(38,90%,55%/0.15)]"
           >
             <video
               src={meetingProsVideo}
@@ -382,12 +382,12 @@ const ServicesSection = () => (
       variants={stagger}
     >
       <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
-        What We <span className="gradient-text-blue">Handle</span>
+        What We <span className="gradient-text-accent">Handle</span>
       </motion.h2>
       <motion.p variants={fadeUp} className="mt-4 text-center text-muted-foreground text-lg">
         One reliable team. Every session. No surprises.
       </motion.p>
-      <motion.div variants={fadeUp} className="mt-12 overflow-hidden rounded-2xl border border-border/20 shadow-[0_0_40px_hsl(216,100%,50%/0.1)]">
+      <motion.div variants={fadeUp} className="mt-12 overflow-hidden rounded-2xl border border-border/20 shadow-[0_0_40px_hsl(38,90%,55%/0.1)]">
         <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-72 object-cover" loading="lazy" />
       </motion.div>
       <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -395,7 +395,7 @@ const ServicesSection = () => (
           <motion.div
             key={s.label}
             variants={fadeUp}
-            className="group glass rounded-2xl p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_30px_hsl(216,100%,50%/0.1)]"
+            className="group glass rounded-2xl p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_30px_hsl(38,90%,55%/0.1)]"
           >
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -424,7 +424,7 @@ const QualifierSection = () => (
       variants={stagger}
     >
       <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
-        Is This <span className="gradient-text-blue">For You?</span>
+        Is This <span className="gradient-text-accent">For You?</span>
       </motion.h2>
       <div className="mt-14 grid gap-8 md:grid-cols-2">
         <motion.div variants={fadeUp} className="rotating-border p-8">
@@ -482,7 +482,7 @@ const SocialProofSection = () => (
   <section className="relative overflow-hidden px-6 py-28">
     <div
       className="absolute inset-0 opacity-30"
-      style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(216 100% 50% / 0.1), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(38 90% 55% / 0.08), transparent 60%)" }}
     />
     <motion.div
       className="relative z-10 mx-auto max-w-5xl"
@@ -492,7 +492,7 @@ const SocialProofSection = () => (
       variants={stagger}
     >
       <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
-        Trusted by <span className="gradient-text-blue">Industry Leaders</span>
+        Trusted by <span className="gradient-text-accent">Industry Leaders</span>
       </motion.h2>
 
       {/* Testimonial */}
@@ -558,7 +558,7 @@ const FounderSection = () => (
               className="h-64 w-64 rounded-2xl object-cover"
             />
             {/* Gradient border frame */}
-            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_hsl(216,100%,50%/0.2)]" />
+            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_hsl(38,90%,55%/0.2)]" />
           </div>
         </motion.div>
         <motion.div variants={fadeUp}>
@@ -614,7 +614,7 @@ const FAQSection = () => (
       variants={stagger}
     >
       <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
-        Common <span className="gradient-text-blue">Questions</span>
+        Common <span className="gradient-text-accent">Questions</span>
       </motion.h2>
       <motion.div variants={fadeUp} className="mt-14">
         <Accordion type="single" collapsible className="space-y-4">
@@ -622,7 +622,7 @@ const FAQSection = () => (
             <AccordionItem
               key={i}
               value={`faq-${i}`}
-              className="rounded-xl glass px-6 border-l-2 border-l-primary/40 data-[state=open]:border-l-primary data-[state=open]:shadow-[0_0_20px_hsl(216,100%,50%/0.1)]"
+              className="rounded-xl glass px-6 border-l-2 border-l-primary/40 data-[state=open]:border-l-primary data-[state=open]:shadow-[0_0_20px_hsl(38,90%,55%/0.1)]"
             >
               <AccordionTrigger className="text-left font-bold hover:no-underline text-base py-5">
                 "{faq.q}"
@@ -645,13 +645,13 @@ const FinalCTA = () => (
     <div
       className="absolute inset-0 animate-gradient-shift"
       style={{
-        background: "linear-gradient(135deg, hsl(216 100% 50% / 0.1), hsl(260 80% 55% / 0.05), hsl(216 100% 50% / 0.08))",
+        background: "linear-gradient(135deg, hsl(38 90% 55% / 0.08), hsl(24 85% 48% / 0.04), hsl(38 90% 55% / 0.06))",
         backgroundSize: "200% 200%",
       }}
     />
     <div
       className="absolute inset-0"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 100% 50% / 0.1), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.08), transparent 60%)" }}
     />
 
     <motion.div
@@ -672,7 +672,7 @@ const FinalCTA = () => (
         <Button
           asChild
           size="lg"
-          className="group bg-primary hover:bg-primary/90 text-primary-foreground px-14 py-7 text-lg font-bold shadow-[0_0_40px_hsl(216,100%,50%/0.4)] hover:shadow-[0_0_60px_hsl(216,100%,50%/0.6)] transition-all duration-300 animate-pulse-glow"
+          className="group bg-primary hover:bg-primary/90 text-primary-foreground px-14 py-7 text-lg font-bold shadow-[0_0_40px_hsl(38,90%,55%/0.4)] hover:shadow-[0_0_60px_hsl(38,90%,55%/0.6)] transition-all duration-300 animate-pulse-glow"
         >
           <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
             Book Your Free Strategy Call
