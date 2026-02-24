@@ -7,6 +7,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import austinPhoto from "@/assets/austin-talley-founder.png";
+import vmLogo from "@/assets/vm-logo-white.png";
+import heroBg from "@/assets/hero-bg.webp";
+import controlRoom from "@/assets/virtual-events-control-room.webp";
+import videoProduction from "@/assets/video-production.webp";
+import meetingProsVideo from "@/assets/meeting-pros-video.mp4";
 
 const CALENDLY = "https://calendly.com/austin-vmproducers";
 
@@ -23,9 +28,7 @@ const stagger = {
 const StickyBar = () => (
   <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-      <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        Virtual Producers
-      </span>
+      <img src={vmLogo} alt="Virtual Producers" className="h-8" />
       <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
         <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
           Book Your Free Strategy Call
@@ -38,7 +41,10 @@ const StickyBar = () => (
 // ─── Hero ───
 const Hero = () => (
   <section className="relative flex min-h-[90vh] items-center justify-center px-6 pt-16">
-    <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-transparent" />
+    <div className="absolute inset-0">
+      <img src={heroBg} alt="" className="h-full w-full object-cover opacity-20" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+    </div>
     <motion.div
       className="relative z-10 mx-auto max-w-4xl text-center"
       initial="hidden"
@@ -135,24 +141,41 @@ const ProblemSection = () => (
 // ─── The Shift ───
 const ShiftSection = () => (
   <section className="relative overflow-hidden px-6 py-24">
-    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5" />
+    <div className="absolute inset-0">
+      <img src={controlRoom} alt="" className="h-full w-full object-cover opacity-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background" />
+    </div>
     <motion.div
-      className="relative z-10 mx-auto max-w-3xl text-center"
+      className="relative z-10 mx-auto max-w-5xl"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
       variants={stagger}
     >
-      <motion.p variants={fadeUp} className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">
-        The Shift
-      </motion.p>
-      <motion.h2 variants={fadeUp} className="text-3xl font-bold sm:text-4xl">
-        What If Technology Was Never a Barrier to Learning?
-      </motion.h2>
-      <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground leading-relaxed">
-        When a dedicated production team handles the platform, your facilitators do what they do best — teach, engage, and lead.
-      </motion.p>
-      <motion.div variants={fadeUp} className="mx-auto mt-8 h-1 w-24 rounded-full bg-primary" />
+      <div className="grid items-center gap-12 md:grid-cols-2">
+        <div>
+          <motion.p variants={fadeUp} className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">
+            The Shift
+          </motion.p>
+          <motion.h2 variants={fadeUp} className="text-3xl font-bold sm:text-4xl">
+            What If Technology Was Never a Barrier to Learning?
+          </motion.h2>
+          <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground leading-relaxed">
+            When a dedicated production team handles the platform, your facilitators do what they do best — teach, engage, and lead.
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-8 h-1 w-24 rounded-full bg-primary" />
+        </div>
+        <motion.div variants={fadeUp} className="overflow-hidden rounded-xl border border-border/30">
+          <video
+            src={meetingProsVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        </motion.div>
+      </div>
     </motion.div>
   </section>
 );
@@ -182,7 +205,10 @@ const ServicesSection = () => (
       <motion.p variants={fadeUp} className="mt-4 text-center text-muted-foreground">
         One reliable team. Every session. No surprises.
       </motion.p>
-      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <motion.div variants={fadeUp} className="mt-10 overflow-hidden rounded-xl border border-border/30">
+        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-64 object-cover" loading="lazy" />
+      </motion.div>
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((s) => (
           <motion.div
             key={s.label}
