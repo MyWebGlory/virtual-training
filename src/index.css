@@ -6,47 +6,47 @@
 
 @layer base {
   :root {
-    --background: 220 20% 4%;
-    --foreground: 0 0% 98%;
+    --background: 240 6% 6%;
+    --foreground: 40 20% 95%;
 
-    --card: 220 18% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 240 5% 10%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 220 18% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 240 5% 10%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 216 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 90% 55%;
+    --primary-foreground: 240 6% 6%;
 
-    --secondary: 220 16% 14%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 40 10% 85%;
 
-    --muted: 220 14% 12%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 240 4% 13%;
+    --muted-foreground: 40 5% 50%;
 
-    --accent: 216 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 38 90% 55%;
+    --accent-foreground: 240 6% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 14% 16%;
-    --input: 220 14% 16%;
-    --ring: 216 100% 50%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 38 90% 55%;
 
     --radius: 0.5rem;
 
-    --glow-primary: 216 100% 50%;
-    --glow-purple: 260 80% 55%;
+    --glow-primary: 38 90% 55%;
+    --glow-secondary: 24 85% 48%;
 
-    --sidebar-background: 220 20% 4%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 216 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 220 14% 16%;
-    --sidebar-ring: 216 100% 50%;
+    --sidebar-background: 240 6% 6%;
+    --sidebar-foreground: 40 20% 95%;
+    --sidebar-primary: 38 90% 55%;
+    --sidebar-primary-foreground: 240 6% 6%;
+    --sidebar-accent: 240 4% 14%;
+    --sidebar-accent-foreground: 40 10% 85%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 38 90% 55%;
   }
 }
 
@@ -67,29 +67,29 @@
 
 @layer utilities {
   .glass {
-    @apply backdrop-blur-xl border border-white/10;
-    background: hsla(220, 18%, 8%, 0.6);
+    @apply backdrop-blur-xl border border-white/[0.08];
+    background: hsla(240, 5%, 10%, 0.6);
   }
 
   .glass-strong {
-    @apply backdrop-blur-2xl border border-white/15;
-    background: hsla(220, 18%, 8%, 0.8);
+    @apply backdrop-blur-2xl border border-white/[0.08];
+    background: hsla(240, 5%, 8%, 0.85);
   }
 
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(216, 100%, 65%), hsl(0, 0%, 100%), hsl(216, 100%, 70%));
+    background-image: linear-gradient(135deg, hsl(38, 90%, 65%), hsl(40, 100%, 90%), hsl(24, 85%, 55%));
     background-size: 200% 200%;
     animation: gradient-shift 4s ease infinite;
   }
 
-  .gradient-text-blue {
+  .gradient-text-accent {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(216, 100%, 60%), hsl(260, 80%, 65%));
+    background-image: linear-gradient(135deg, hsl(38, 90%, 60%), hsl(24, 85%, 50%));
   }
 
   .glow-line {
-    box-shadow: 0 0 15px hsl(216, 100%, 50% / 0.4), 0 0 45px hsl(216, 100%, 50% / 0.15);
+    box-shadow: 0 0 15px hsl(38, 90%, 55% / 0.4), 0 0 45px hsl(38, 90%, 55% / 0.15);
   }
 
   .noise-overlay {
@@ -102,7 +102,7 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.03;
+    opacity: 0.025;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 256px 256px;
@@ -119,7 +119,7 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: conic-gradient(from 0deg, hsl(216, 100%, 50%), hsl(260, 80%, 55%), hsl(216, 100%, 50%));
+    background: conic-gradient(from 0deg, hsl(38, 90%, 55%), hsl(24, 85%, 48%), hsl(38, 90%, 55%));
     animation: rotate-border 3s linear infinite;
     z-index: -1;
   }
@@ -129,7 +129,7 @@
     position: absolute;
     inset: 2px;
     border-radius: inherit;
-    background: hsl(220, 18%, 8%);
+    background: hsl(240, 5%, 10%);
     z-index: -1;
   }
 }
