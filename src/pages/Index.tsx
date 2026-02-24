@@ -18,14 +18,22 @@ import logoAdidas from "@/assets/logos/adidas.png";
 import logoChevrolet from "@/assets/logos/chevrolet.png";
 import logoAngryOrchard from "@/assets/logos/angry-orchard.png";
 import logoAtlantaUnited from "@/assets/logos/atlanta-united.png";
+import logoNokia from "@/assets/logos/nokia.png";
+import logoOracle from "@/assets/logos/oracle.png";
+import logoSamsung from "@/assets/logos/samsung.png";
+import logoSecureworks from "@/assets/logos/secureworks.png";
 
 const clientLogos = [
   { src: logoNike, alt: "Nike" },
+  { src: logoSamsung, alt: "Samsung" },
   { src: logoHp, alt: "HP" },
+  { src: logoOracle, alt: "Oracle" },
   { src: logoAdidas, alt: "Adidas" },
+  { src: logoNokia, alt: "Nokia" },
   { src: logoChevrolet, alt: "Chevrolet" },
   { src: logoAngryOrchard, alt: "Angry Orchard" },
   { src: logoAtlantaUnited, alt: "Atlanta United" },
+  { src: logoSecureworks, alt: "Secureworks" },
 ];
 
 const CALENDLY = "https://calendly.com/austin-vmproducers";
