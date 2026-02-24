@@ -1,8 +1,9 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRef } from "react";
 import {
   Monitor, Users, BarChart3, Wrench, ClipboardCheck, UserCheck,
   CheckCircle2, XCircle, Star, Phone, Mail, Linkedin, ChevronDown,
-  Zap, Shield, Layers
+  Zap, Shield, Layers, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -39,20 +40,60 @@ const clientLogos = [
 const CALENDLY = "https://calendly.com/austin-vmproducers";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 };
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.12 } },
+  visible: { transition: { staggerChildren: 0.15 } },
+};
+
+// ─── Floating Background Blobs ───
+const FloatingBlobs = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div
+      className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-20 animate-float-slow"
+      style={{ background: "radial-gradient(circle, hsl(216 100% 50% / 0.3), transparent 70%)" }}
+    />
+    <div
+      className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full opacity-15 animate-float"
+      style={{ background: "radial-gradient(circle, hsl(260 80% 55% / 0.25), transparent 70%)", animationDelay: "2s" }}
+    />
+    <div
+      className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] rounded-full opacity-10 animate-float-slow"
+      style={{ background: "radial-gradient(circle, hsl(216 100% 50% / 0.2), transparent 70%)", animationDelay: "4s" }}
+    />
+  </div>
+);
+
+// ─── Connecting Line SVG ───
+const ConnectingLine = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  return (
+    <div ref={ref} className="flex justify-center py-4">
+      <svg width="2" height="80" viewBox="0 0 2 80" className="overflow-visible">
+        <motion.line
+          x1="1" y1="0" x2="1" y2="80"
+          stroke="hsl(216, 100%, 50%)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          style={{ pathLength }}
+          className="drop-shadow-[0_0_8px_hsl(216,100%,50%)]"
+        />
+      </svg>
+    </div>
+  );
 };
 
 // ─── Sticky Top Bar ───
 const StickyBar = () => (
-  <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+  <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
       <img src={vmLogo} alt="Virtual Producers" className="h-8" />
-      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-[0_0_20px_hsl(216,100%,50%/0.3)]">
         <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
           Book Your Free Strategy Call
         </a>
@@ -62,73 +103,137 @@ const StickyBar = () => (
 );
 
 // ─── Hero ───
-const Hero = () => (
-  <section className="relative flex min-h-[90vh] items-center justify-center px-6 pt-16">
-    <div className="absolute inset-0">
-      <img src={heroBg} alt="" className="h-full w-full object-cover opacity-20" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-    </div>
-    <motion.div
-      className="relative z-10 mx-auto max-w-4xl text-center"
-      initial="hidden"
-      animate="visible"
-      variants={stagger}
-    >
-      <motion.h1
-        variants={fadeUp}
-        className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-      >
-        Your Facilitators Shouldn't Be Managing{" "}
-        <span className="text-primary">Breakout Rooms.</span>
-      </motion.h1>
-      <motion.p
-        variants={fadeUp}
-        className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl"
-      >
-        For corporate cohorts of 50+ participants, we handle every technical detail — so your training team can focus entirely on delivery.
-      </motion.p>
-      <motion.div variants={fadeUp} className="mt-10">
-        <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-base font-semibold">
-          <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
-            Book a Free Strategy Call
-          </a>
-        </Button>
+const Hero = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  return (
+    <section ref={ref} className="relative flex min-h-screen items-center justify-center px-6 pt-16 overflow-hidden">
+      {/* Parallax Background */}
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
+        <img src={heroBg} alt="" className="h-[120%] w-full object-cover opacity-30" />
       </motion.div>
+
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{ background: "radial-gradient(ellipse at 50% 30%, hsl(216 100% 50% / 0.15), transparent 60%)" }}
+      />
+
+      {/* Grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: "radial-gradient(circle, hsl(0 0% 100%) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
       <motion.div
-        variants={fadeUp}
-        className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground sm:gap-10"
+        className="relative z-10 mx-auto max-w-5xl text-center"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+        style={{ opacity }}
       >
-        {[
-          "2,000+ Successful Events",
-          "100% Success Rate",
-          "350K+ Global Attendees",
-        ].map((stat) => (
-          <div key={stat} className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-            <span className="font-medium text-foreground/80">{stat}</span>
-          </div>
-        ))}
+        <motion.div
+          variants={fadeUp}
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm"
+        >
+          <span className="h-2 w-2 rounded-full bg-primary animate-pulse-glow" />
+          Production Partners for Enterprise Training
+        </motion.div>
+
+        <motion.h1
+          variants={fadeUp}
+          className="text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+        >
+          Your Facilitators
+          <br />
+          Shouldn't Be Managing{" "}
+          <span className="gradient-text">Breakout Rooms.</span>
+        </motion.h1>
+
+        <motion.p
+          variants={fadeUp}
+          className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed"
+        >
+          For corporate cohorts of 50+ participants, we handle every technical detail — so your training team can focus entirely on delivery.
+        </motion.p>
+
+        <motion.div variants={fadeUp} className="mt-12">
+          <Button
+            asChild
+            size="lg"
+            className="group bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-7 text-lg font-bold shadow-[0_0_30px_hsl(216,100%,50%/0.4)] hover:shadow-[0_0_50px_hsl(216,100%,50%/0.6)] transition-shadow"
+          >
+            <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+              Book a Free Strategy Call
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </a>
+          </Button>
+        </motion.div>
+
+        {/* Glass Stats */}
+        <motion.div
+          variants={fadeUp}
+          className="mt-16 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+        >
+          {[
+            { num: "2,000+", label: "Successful Events" },
+            { num: "100%", label: "Success Rate" },
+            { num: "350K+", label: "Global Attendees" },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="glass rounded-xl px-6 py-4 text-center min-w-[140px]"
+            >
+              <div className="text-2xl font-extrabold gradient-text-blue">{stat.num}</div>
+              <div className="mt-1 text-xs text-muted-foreground tracking-wide uppercase">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
       </motion.div>
-    </motion.div>
-  </section>
-);
+
+      {/* Scroll Indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <ChevronDown className="h-6 w-6 text-primary/60" />
+      </motion.div>
+
+      {/* Glowing accent line */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-[2px] bg-primary/50 glow-line" />
+    </section>
+  );
+};
 
 // ─── Logo Marquee ───
 const LogoMarquee = () => (
-  <section className="overflow-hidden border-y border-border/30 py-10">
-    <p className="mb-8 text-center text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+  <section className="overflow-hidden border-y border-border/20 py-12">
+    <motion.p
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mb-10 text-center text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground"
+    >
       They trusted us to run their highest-stakes programs
-    </p>
+    </motion.p>
     <div className="relative">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
-      <div className="flex animate-marquee items-center gap-16">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-32 bg-gradient-to-r from-background to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-32 bg-gradient-to-l from-background to-transparent" />
+      <div className="flex animate-marquee items-center gap-20">
         {[...clientLogos, ...clientLogos, ...clientLogos].map((logo, i) => (
           <img
             key={i}
             src={logo.src}
             alt={logo.alt}
-            className="h-10 w-auto shrink-0 brightness-0 invert opacity-50 grayscale"
+            className="h-12 w-auto shrink-0 brightness-0 invert opacity-40 grayscale hover:opacity-70 transition-opacity duration-300"
           />
         ))}
       </div>
@@ -140,23 +245,26 @@ const LogoMarquee = () => (
 const problems = [
   {
     icon: Zap,
+    num: "01",
     title: "Facilitator Overload",
     text: "Your instructors are juggling teaching, chat, polls, breakout rooms, and troubleshooting — all at once. Teaching always suffers.",
   },
   {
     icon: Shield,
+    num: "02",
     title: "Credibility at Risk",
     text: "One technical glitch in a high-stakes cohort erodes professional trust. In corporate training, trust = future contracts.",
   },
   {
     icon: Layers,
+    num: "03",
     title: "Interactivity Chaos",
     text: "You want polls, breakout rooms, and smooth transitions. Without a dedicated producer, complexity becomes chaos.",
   },
 ];
 
 const ProblemSection = () => (
-  <section className="px-6 py-24">
+  <section className="px-6 py-28 relative">
     <motion.div
       className="mx-auto max-w-6xl"
       initial="hidden"
@@ -164,17 +272,31 @@ const ProblemSection = () => (
       viewport={{ once: true, amount: 0.2 }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-bold sm:text-4xl">
-        The Hidden Cost of <span className="text-primary">DIY Production</span>
+      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+        The Hidden Cost of <span className="gradient-text-blue">DIY Production</span>
       </motion.h2>
-      <div className="mt-14 grid gap-6 md:grid-cols-3">
+      <div className="mt-16 grid gap-8 md:grid-cols-3 relative">
+        {/* Connecting line between cards (desktop) */}
+        <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-[2px] -translate-y-1/2 z-0">
+          <motion.div
+            className="h-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, delay: 0.5 }}
+          />
+        </div>
         {problems.map((p) => (
           <motion.div
             key={p.title}
             variants={fadeUp}
-            className="rounded-xl border border-border/60 bg-card p-8 transition-colors hover:border-primary/40"
+            className="relative group glass rounded-2xl p-8 transition-all duration-500 hover:border-primary/40 hover:-translate-y-2 hover:shadow-[0_0_40px_hsl(216,100%,50%/0.15)] z-10"
           >
-            <p.icon className="mb-4 h-8 w-8 text-primary" />
+            {/* Large step number */}
+            <span className="absolute top-4 right-6 text-7xl font-extrabold text-primary/[0.07] select-none">{p.num}</span>
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 mb-6 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+              <p.icon className="h-7 w-7 text-primary" />
+            </div>
             <h3 className="mb-3 text-xl font-bold">{p.title}</h3>
             <p className="text-muted-foreground leading-relaxed">{p.text}</p>
           </motion.div>
@@ -185,46 +307,60 @@ const ProblemSection = () => (
 );
 
 // ─── The Shift ───
-const ShiftSection = () => (
-  <section className="relative overflow-hidden px-6 py-24">
-    <div className="absolute inset-0">
-      <img src={controlRoom} alt="" className="h-full w-full object-cover opacity-10" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background" />
-    </div>
-    <motion.div
-      className="relative z-10 mx-auto max-w-5xl"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={stagger}
-    >
-      <div className="grid items-center gap-12 md:grid-cols-2">
-        <div>
-          <motion.p variants={fadeUp} className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">
-            The Shift
-          </motion.p>
-          <motion.h2 variants={fadeUp} className="text-3xl font-bold sm:text-4xl">
-            What If Technology Was Never a Barrier to Learning?
-          </motion.h2>
-          <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            When a dedicated production team handles the platform, your facilitators do what they do best — teach, engage, and lead.
-          </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 h-1 w-24 rounded-full bg-primary" />
+const ShiftSection = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+
+  return (
+    <section ref={ref} className="relative overflow-hidden px-6 py-28">
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
+        <img src={controlRoom} alt="" className="h-[120%] w-full object-cover opacity-10" />
+      </motion.div>
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background" />
+
+      <motion.div
+        className="relative z-10 mx-auto max-w-5xl"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={stagger}
+      >
+        <div className="grid items-center gap-14 md:grid-cols-2">
+          <div>
+            <motion.p variants={fadeUp} className="mb-4 text-sm font-bold uppercase tracking-[0.25em] text-primary">
+              The Shift
+            </motion.p>
+            <motion.h2 variants={fadeUp} className="text-4xl font-extrabold sm:text-5xl leading-tight">
+              What If Technology Was Never a{" "}
+              <span className="gradient-text-blue">Barrier</span> to Learning?
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground leading-relaxed">
+              When a dedicated production team handles the platform, your facilitators do what they do best — teach, engage, and lead.
+            </motion.p>
+            <motion.div
+              variants={fadeUp}
+              className="mt-8 h-1 w-24 rounded-full bg-primary glow-line"
+            />
+          </div>
+          <motion.div
+            variants={fadeUp}
+            className="overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_30px_hsl(216,100%,50%/0.15)]"
+          >
+            <video
+              src={meetingProsVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+            />
+          </motion.div>
         </div>
-        <motion.div variants={fadeUp} className="overflow-hidden rounded-xl border border-border/30">
-          <video
-            src={meetingProsVideo}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover"
-          />
-        </motion.div>
-      </div>
-    </motion.div>
-  </section>
-);
+      </motion.div>
+    </section>
+  );
+};
 
 // ─── Services ───
 const services = [
@@ -237,7 +373,7 @@ const services = [
 ];
 
 const ServicesSection = () => (
-  <section className="px-6 py-24">
+  <section className="px-6 py-28">
     <motion.div
       className="mx-auto max-w-6xl"
       initial="hidden"
@@ -245,28 +381,30 @@ const ServicesSection = () => (
       viewport={{ once: true, amount: 0.2 }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-bold sm:text-4xl">
-        What We <span className="text-primary">Handle</span>
+      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+        What We <span className="gradient-text-blue">Handle</span>
       </motion.h2>
-      <motion.p variants={fadeUp} className="mt-4 text-center text-muted-foreground">
+      <motion.p variants={fadeUp} className="mt-4 text-center text-muted-foreground text-lg">
         One reliable team. Every session. No surprises.
       </motion.p>
-      <motion.div variants={fadeUp} className="mt-10 overflow-hidden rounded-xl border border-border/30">
-        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-64 object-cover" loading="lazy" />
+      <motion.div variants={fadeUp} className="mt-12 overflow-hidden rounded-2xl border border-border/20 shadow-[0_0_40px_hsl(216,100%,50%/0.1)]">
+        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-72 object-cover" loading="lazy" />
       </motion.div>
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {services.map((s) => (
+      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((s, i) => (
           <motion.div
             key={s.label}
             variants={fadeUp}
-            className="flex items-start gap-4 rounded-lg border border-border/40 bg-card/50 p-6"
+            className="group glass rounded-2xl p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_30px_hsl(216,100%,50%/0.1)]"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <s.icon className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-bold">{s.label}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <s.icon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">{s.label}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+              </div>
             </div>
           </motion.div>
         ))}
@@ -277,7 +415,7 @@ const ServicesSection = () => (
 
 // ─── Qualifier ───
 const QualifierSection = () => (
-  <section className="px-6 py-24">
+  <section className="px-6 py-28">
     <motion.div
       className="mx-auto max-w-4xl"
       initial="hidden"
@@ -285,11 +423,11 @@ const QualifierSection = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-bold sm:text-4xl">
-        Is This <span className="text-primary">For You?</span>
+      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+        Is This <span className="gradient-text-blue">For You?</span>
       </motion.h2>
       <div className="mt-14 grid gap-8 md:grid-cols-2">
-        <motion.div variants={fadeUp} className="rounded-xl border border-primary/30 bg-primary/5 p-8">
+        <motion.div variants={fadeUp} className="rotating-border p-8">
           <h3 className="mb-6 text-lg font-bold text-primary">This is for you if…</h3>
           <ul className="space-y-4">
             {[
@@ -297,26 +435,40 @@ const QualifierSection = () => (
               "Your programs span 6–12+ sessions",
               "You operate in medical, financial, or enterprise environments",
               "Professional credibility is non-negotiable",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3">
+            ].map((item, i) => (
+              <motion.li
+                key={item}
+                className="flex items-start gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+              >
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <span className="text-foreground/90">{item}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </motion.div>
-        <motion.div variants={fadeUp} className="rounded-xl border border-border/60 bg-card p-8">
+        <motion.div variants={fadeUp} className="glass rounded-xl p-8">
           <h3 className="mb-6 text-lg font-bold text-muted-foreground">This is NOT for…</h3>
           <ul className="space-y-4">
             {[
               "Solo coaches or individual presenters",
               "Small webinars under 30 participants",
               "One-off workshops or single events",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3">
+            ].map((item, i) => (
+              <motion.li
+                key={item}
+                className="flex items-start gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+              >
                 <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground/50" />
                 <span className="text-muted-foreground">{item}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </motion.div>
@@ -327,8 +479,11 @@ const QualifierSection = () => (
 
 // ─── Social Proof ───
 const SocialProofSection = () => (
-  <section className="relative overflow-hidden px-6 py-24">
-    <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+  <section className="relative overflow-hidden px-6 py-28">
+    <div
+      className="absolute inset-0 opacity-30"
+      style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(216 100% 50% / 0.1), transparent 60%)" }}
+    />
     <motion.div
       className="relative z-10 mx-auto max-w-5xl"
       initial="hidden"
@@ -336,38 +491,47 @@ const SocialProofSection = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-bold sm:text-4xl">
-        Trusted by <span className="text-primary">Industry Leaders</span>
+      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+        Trusted by <span className="gradient-text-blue">Industry Leaders</span>
       </motion.h2>
 
       {/* Testimonial */}
-      <motion.div variants={fadeUp} className="mx-auto mt-14 max-w-3xl rounded-xl border border-border/40 bg-card p-8 md:p-10">
-        <div className="flex gap-1 mb-4">
+      <motion.div variants={fadeUp} className="relative mx-auto mt-16 max-w-3xl glass rounded-2xl p-10 md:p-12">
+        {/* Large quotation mark */}
+        <span className="absolute top-4 left-6 text-8xl font-extrabold text-primary/[0.06] select-none leading-none">"</span>
+
+        <div className="flex gap-1 mb-6">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+            >
+              <Star className="h-5 w-5 fill-primary text-primary" />
+            </motion.div>
           ))}
         </div>
         <blockquote className="text-lg leading-relaxed text-foreground/90 italic">
           "I have been so blessed to work with Virtual Producers!!! They are ALWAYS on time, professional, detail-oriented and committed to excellence. This team works alongside our team to produce high-quality events."
         </blockquote>
-        <div className="mt-6">
-          <p className="font-bold">Jeanette McCullough</p>
+        <div className="mt-8">
+          <p className="font-bold text-lg">Jeanette McCullough</p>
           <p className="text-sm text-muted-foreground">BirthSwell — Director of Virtual Events</p>
         </div>
       </motion.div>
 
       {/* Review Badges */}
-
-      {/* Review Badges */}
-      <motion.div variants={fadeUp} className="mt-12 flex flex-wrap items-center justify-center gap-8">
+      <motion.div variants={fadeUp} className="mt-14 flex flex-wrap items-center justify-center gap-8">
         {["Capterra", "Trustpilot", "Google"].map((platform) => (
-          <div key={platform} className="flex items-center gap-2">
+          <div key={platform} className="glass rounded-lg px-5 py-3 flex items-center gap-3">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" />
               ))}
             </div>
-            <span className="text-sm font-medium text-muted-foreground">{platform}</span>
+            <span className="text-sm font-semibold text-muted-foreground">{platform}</span>
           </div>
         ))}
       </motion.div>
@@ -377,7 +541,7 @@ const SocialProofSection = () => (
 
 // ─── Meet Austin ───
 const FounderSection = () => (
-  <section className="px-6 py-24">
+  <section className="px-6 py-28">
     <motion.div
       className="mx-auto max-w-4xl"
       initial="hidden"
@@ -385,28 +549,32 @@ const FounderSection = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <div className="flex flex-col items-center gap-10 md:flex-row md:items-start md:gap-14">
+      <div className="flex flex-col items-center gap-12 md:flex-row md:items-start md:gap-14">
         <motion.div variants={fadeUp} className="shrink-0">
-          <img
-            src={austinPhoto}
-            alt="Austin Talley, Founder of Virtual Producers"
-            className="h-56 w-56 rounded-2xl object-cover border-2 border-primary/20"
-          />
+          <div className="relative">
+            <img
+              src={austinPhoto}
+              alt="Austin Talley, Founder of Virtual Producers"
+              className="h-64 w-64 rounded-2xl object-cover"
+            />
+            {/* Gradient border frame */}
+            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_hsl(216,100%,50%/0.2)]" />
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">Meet the Founder</p>
-          <h2 className="text-3xl font-bold sm:text-4xl">Austin Talley</h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
+          <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-primary">Meet the Founder</p>
+          <h2 className="text-4xl font-extrabold sm:text-5xl">Austin Talley</h2>
+          <p className="mt-6 text-muted-foreground leading-relaxed text-lg">
             With over 2,000 successful virtual events produced globally, Austin built Virtual Producers to solve one problem: facilitators shouldn't double as tech support. Based in New York, he and his team provide the calm, invisible production backbone that high-stakes cohort programs demand.
           </p>
-          <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
-            <a href="tel:4043371539" className="flex items-center gap-2 hover:text-foreground transition-colors">
+          <div className="mt-8 flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <a href="tel:4043371539" className="flex items-center gap-2 hover:text-primary transition-colors glass rounded-lg px-4 py-2">
               <Phone className="h-4 w-4" /> 404.337.1539
             </a>
-            <a href="mailto:austin@vproducers.com" className="flex items-center gap-2 hover:text-foreground transition-colors">
+            <a href="mailto:austin@vproducers.com" className="flex items-center gap-2 hover:text-primary transition-colors glass rounded-lg px-4 py-2">
               <Mail className="h-4 w-4" /> austin@vproducers.com
             </a>
-            <a href="https://www.linkedin.com/in/talley-austin" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-foreground transition-colors">
+            <a href="https://www.linkedin.com/in/talley-austin" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors glass rounded-lg px-4 py-2">
               <Linkedin className="h-4 w-4" /> LinkedIn
             </a>
           </div>
@@ -437,7 +605,7 @@ const faqs = [
 ];
 
 const FAQSection = () => (
-  <section className="px-6 py-24">
+  <section className="px-6 py-28">
     <motion.div
       className="mx-auto max-w-3xl"
       initial="hidden"
@@ -445,17 +613,21 @@ const FAQSection = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-bold sm:text-4xl">
-        Common <span className="text-primary">Questions</span>
+      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+        Common <span className="gradient-text-blue">Questions</span>
       </motion.h2>
-      <motion.div variants={fadeUp} className="mt-12">
-        <Accordion type="single" collapsible className="space-y-3">
+      <motion.div variants={fadeUp} className="mt-14">
+        <Accordion type="single" collapsible className="space-y-4">
           {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`faq-${i}`} className="rounded-lg border border-border/60 bg-card px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="rounded-xl glass px-6 border-l-2 border-l-primary/40 data-[state=open]:border-l-primary data-[state=open]:shadow-[0_0_20px_hsl(216,100%,50%/0.1)]"
+            >
+              <AccordionTrigger className="text-left font-bold hover:no-underline text-base py-5">
                 "{faq.q}"
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
+              <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
@@ -468,8 +640,20 @@ const FAQSection = () => (
 
 // ─── Final CTA ───
 const FinalCTA = () => (
-  <section className="relative overflow-hidden px-6 py-28">
-    <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-primary/5 to-transparent" />
+  <section className="relative overflow-hidden px-6 py-32">
+    {/* Animated gradient mesh background */}
+    <div
+      className="absolute inset-0 animate-gradient-shift"
+      style={{
+        background: "linear-gradient(135deg, hsl(216 100% 50% / 0.1), hsl(260 80% 55% / 0.05), hsl(216 100% 50% / 0.08))",
+        backgroundSize: "200% 200%",
+      }}
+    />
+    <div
+      className="absolute inset-0"
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 100% 50% / 0.1), transparent 60%)" }}
+    />
+
     <motion.div
       className="relative z-10 mx-auto max-w-3xl text-center"
       initial="hidden"
@@ -477,24 +661,30 @@ const FinalCTA = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <motion.h2 variants={fadeUp} className="text-3xl font-bold sm:text-4xl md:text-5xl">
-        Stop Risking Your Program's <span className="text-primary">Credibility.</span>
+      <motion.h2 variants={fadeUp} className="text-4xl font-extrabold sm:text-5xl md:text-6xl leading-tight">
+        Stop Risking Your Program's{" "}
+        <span className="gradient-text">Credibility.</span>
       </motion.h2>
-      <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground">
+      <motion.p variants={fadeUp} className="mt-8 text-lg text-muted-foreground">
         Book a free strategy call. Let's make technology invisible.
       </motion.p>
-      <motion.div variants={fadeUp} className="mt-10">
-        <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-base font-semibold">
+      <motion.div variants={fadeUp} className="mt-12">
+        <Button
+          asChild
+          size="lg"
+          className="group bg-primary hover:bg-primary/90 text-primary-foreground px-14 py-7 text-lg font-bold shadow-[0_0_40px_hsl(216,100%,50%/0.4)] hover:shadow-[0_0_60px_hsl(216,100%,50%/0.6)] transition-all duration-300 animate-pulse-glow"
+        >
           <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
             Book Your Free Strategy Call
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </a>
         </Button>
       </motion.div>
-      <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-        <a href="tel:4043371539" className="flex items-center gap-2 hover:text-foreground transition-colors">
+      <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+        <a href="tel:4043371539" className="flex items-center gap-2 hover:text-primary transition-colors">
           <Phone className="h-4 w-4" /> 404.337.1539
         </a>
-        <a href="mailto:austin@vproducers.com" className="flex items-center gap-2 hover:text-foreground transition-colors">
+        <a href="mailto:austin@vproducers.com" className="flex items-center gap-2 hover:text-primary transition-colors">
           <Mail className="h-4 w-4" /> austin@vproducers.com
         </a>
       </motion.div>
@@ -504,13 +694,13 @@ const FinalCTA = () => (
 
 // ─── Footer ───
 const Footer = () => (
-  <footer className="border-t border-border/40 px-6 py-8">
+  <footer className="border-t border-border/20 px-6 py-10">
     <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 text-sm text-muted-foreground sm:flex-row sm:justify-between">
       <span>© {new Date().getFullYear()} Virtual Producers · New York, NY</span>
       <div className="flex items-center gap-6">
-        <a href="mailto:austin@vproducers.com" className="hover:text-foreground transition-colors">austin@vproducers.com</a>
-        <a href="tel:4043371539" className="hover:text-foreground transition-colors">404.337.1539</a>
-        <a href="https://www.linkedin.com/in/talley-austin" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+        <a href="mailto:austin@vproducers.com" className="hover:text-primary transition-colors">austin@vproducers.com</a>
+        <a href="tel:4043371539" className="hover:text-primary transition-colors">404.337.1539</a>
+        <a href="https://www.linkedin.com/in/talley-austin" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
           <Linkedin className="h-4 w-4" />
         </a>
       </div>
@@ -520,18 +710,27 @@ const Footer = () => (
 
 // ─── Main Page ───
 const Index = () => (
-  <div className="min-h-screen bg-background text-foreground">
+  <div className="min-h-screen bg-background text-foreground noise-overlay">
+    <FloatingBlobs />
     <StickyBar />
-    <main>
+    <main className="relative z-[2]">
       <Hero />
       <LogoMarquee />
+      <ConnectingLine />
       <ProblemSection />
+      <ConnectingLine />
       <ShiftSection />
+      <ConnectingLine />
       <ServicesSection />
+      <ConnectingLine />
       <QualifierSection />
+      <ConnectingLine />
       <SocialProofSection />
+      <ConnectingLine />
       <FounderSection />
+      <ConnectingLine />
       <FAQSection />
+      <ConnectingLine />
       <FinalCTA />
     </main>
     <Footer />

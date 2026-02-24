@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,7 +15,7 @@
     --popover: 220 18% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 216 100% 29%;
+    --primary: 216 100% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 16% 14%;
@@ -24,7 +24,7 @@
     --muted: 220 14% 12%;
     --muted-foreground: 220 10% 55%;
 
-    --accent: 216 100% 29%;
+    --accent: 216 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -32,18 +32,21 @@
 
     --border: 220 14% 16%;
     --input: 220 14% 16%;
-    --ring: 216 100% 29%;
+    --ring: 216 100% 50%;
 
     --radius: 0.5rem;
 
+    --glow-primary: 216 100% 50%;
+    --glow-purple: 260 80% 55%;
+
     --sidebar-background: 220 20% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 216 100% 29%;
+    --sidebar-primary: 216 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 16% 14%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 220 14% 16%;
-    --sidebar-ring: 216 100% 29%;
+    --sidebar-ring: 216 100% 50%;
   }
 }
 
@@ -58,6 +61,79 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
   }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl border border-white/10;
+    background: hsla(220, 18%, 8%, 0.6);
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-2xl border border-white/15;
+    background: hsla(220, 18%, 8%, 0.8);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(216, 100%, 65%), hsl(0, 0%, 100%), hsl(216, 100%, 70%));
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  .gradient-text-blue {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(216, 100%, 60%), hsl(260, 80%, 65%));
+  }
+
+  .glow-line {
+    box-shadow: 0 0 15px hsl(216, 100%, 50% / 0.4), 0 0 45px hsl(216, 100%, 50% / 0.15);
+  }
+
+  .noise-overlay {
+    position: relative;
+  }
+
+  .noise-overlay::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  .rotating-border {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+  }
+
+  .rotating-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: conic-gradient(from 0deg, hsl(216, 100%, 50%), hsl(260, 80%, 55%), hsl(216, 100%, 50%));
+    animation: rotate-border 3s linear infinite;
+    z-index: -1;
+  }
+
+  .rotating-border::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+    background: hsl(220, 18%, 8%);
+    z-index: -1;
+  }
+}
+
+@keyframes rotate-border {
+  to { transform: rotate(360deg); }
 }
