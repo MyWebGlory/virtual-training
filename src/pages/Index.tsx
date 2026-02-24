@@ -444,7 +444,7 @@ const Hero = () => {
           transition={{ duration: 0.9, delay: 1.5, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed"
         >
-          They're teaching, managing chat, launching polls, opening breakout rooms, troubleshooting audio, and watching the clock —{" "}
+          They're teaching, managing chat, launching polls, opening breakout rooms, troubleshooting audio, and watching the clock , {" "}
           <span className="text-foreground font-semibold keyword-glow">all at the same time.</span>{" "}
           Something's gotta give. Usually, it's the{" "}
           <span className="text-primary/90 font-semibold">quality of your program.</span>
