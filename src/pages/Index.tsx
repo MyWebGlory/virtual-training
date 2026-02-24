@@ -77,11 +77,11 @@ const ConnectingLine = () => {
       <svg width="2" height="80" viewBox="0 0 2 80" className="overflow-visible">
         <motion.line
           x1="1" y1="0" x2="1" y2="80"
-          stroke="hsl(38, 90%, 55%)"
+          stroke="hsl(216, 90%, 58%)"
           strokeWidth="2"
           strokeLinecap="round"
           style={{ pathLength }}
-          className="drop-shadow-[0_0_8px_hsl(38,90%,55%)]"
+          className="drop-shadow-[0_0_8px_hsl(216,90%,58%)]"
         />
       </svg>
     </div>
@@ -208,7 +208,7 @@ const Hero = () => {
       </motion.div>
 
       {/* Glowing accent line */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-[2px] bg-primary/50 glow-line" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-[2px] bg-line-accent/50 glow-line" />
     </section>
   );
 };
@@ -278,8 +278,8 @@ const ProblemSection = () => (
       <div className="mt-16 grid gap-8 md:grid-cols-3 relative">
         {/* Connecting line between cards (desktop) */}
         <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-[2px] -translate-y-1/2 z-0">
-          <motion.div
-            className="h-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+           <motion.div
+            className="h-full bg-gradient-to-r from-transparent via-line-accent/30 to-transparent"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
@@ -294,8 +294,8 @@ const ProblemSection = () => (
           >
             {/* Large step number */}
             <span className="absolute top-4 right-6 text-7xl font-extrabold text-primary/[0.07] select-none">{p.num}</span>
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 mb-6 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-              <p.icon className="h-7 w-7 text-primary" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-icon-accent/10 border border-icon-accent/20 mb-6 group-hover:scale-110 group-hover:bg-icon-accent/20 transition-all duration-300">
+              <p.icon className="h-7 w-7 text-icon-accent" />
             </div>
             <h3 className="mb-3 text-xl font-bold">{p.title}</h3>
             <p className="text-muted-foreground leading-relaxed">{p.text}</p>
@@ -340,7 +340,7 @@ const ShiftSection = () => {
             </motion.p>
             <motion.div
               variants={fadeUp}
-              className="mt-8 h-1 w-24 rounded-full bg-primary glow-line"
+              className="mt-8 h-1 w-24 rounded-full bg-line-accent glow-line"
             />
           </div>
           <motion.div
@@ -398,8 +398,8 @@ const ServicesSection = () => (
             className="group glass rounded-2xl p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_30px_hsl(38,90%,55%/0.1)]"
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <s.icon className="h-6 w-6 text-primary" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-icon-accent/10 border border-icon-accent/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <s.icon className="h-6 w-6 text-icon-accent" />
               </div>
               <div>
                 <h3 className="font-bold text-lg">{s.label}</h3>
@@ -622,7 +622,7 @@ const FAQSection = () => (
             <AccordionItem
               key={i}
               value={`faq-${i}`}
-              className="rounded-xl glass px-6 border-l-2 border-l-primary/40 data-[state=open]:border-l-primary data-[state=open]:shadow-[0_0_20px_hsl(38,90%,55%/0.1)]"
+              className="rounded-xl glass px-6 border-l-2 border-l-line-accent/40 data-[state=open]:border-l-line-accent data-[state=open]:shadow-[0_0_20px_hsl(216,90%,58%/0.1)]"
             >
               <AccordionTrigger className="text-left font-bold hover:no-underline text-base py-5">
                 "{faq.q}"

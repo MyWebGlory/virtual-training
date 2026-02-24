@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -38,6 +38,8 @@
 
     --glow-primary: 38 90% 55%;
     --glow-secondary: 24 85% 48%;
+    --line-accent: 216 90% 58%;
+    --icon-accent: 216 90% 58%;
 
     --sidebar-background: 240 6% 6%;
     --sidebar-foreground: 40 20% 95%;
@@ -61,7 +63,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Outfit', sans-serif;
   }
 }
 
@@ -89,7 +91,7 @@
   }
 
   .glow-line {
-    box-shadow: 0 0 15px hsl(38, 90%, 55% / 0.4), 0 0 45px hsl(38, 90%, 55% / 0.15);
+    box-shadow: 0 0 15px hsl(216, 90%, 58% / 0.4), 0 0 45px hsl(216, 90%, 58% / 0.15);
   }
 
   .noise-overlay {
