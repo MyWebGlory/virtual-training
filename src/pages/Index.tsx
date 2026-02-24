@@ -12,6 +12,21 @@ import heroBg from "@/assets/hero-bg.webp";
 import controlRoom from "@/assets/virtual-events-control-room.webp";
 import videoProduction from "@/assets/video-production.webp";
 import meetingProsVideo from "@/assets/meeting-pros-video.mp4";
+import logoNike from "@/assets/logos/nike.png";
+import logoHp from "@/assets/logos/hp.png";
+import logoAdidas from "@/assets/logos/adidas.png";
+import logoChevrolet from "@/assets/logos/chevrolet.png";
+import logoAngryOrchard from "@/assets/logos/angry-orchard.png";
+import logoAtlantaUnited from "@/assets/logos/atlanta-united.png";
+
+const clientLogos = [
+  { src: logoNike, alt: "Nike" },
+  { src: logoHp, alt: "HP" },
+  { src: logoAdidas, alt: "Adidas" },
+  { src: logoChevrolet, alt: "Chevrolet" },
+  { src: logoAngryOrchard, alt: "Angry Orchard" },
+  { src: logoAtlantaUnited, alt: "Atlanta United" },
+];
 
 const CALENDLY = "https://calendly.com/austin-vmproducers";
 
@@ -87,6 +102,29 @@ const Hero = () => (
         ))}
       </motion.div>
     </motion.div>
+  </section>
+);
+
+// ─── Logo Marquee ───
+const LogoMarquee = () => (
+  <section className="overflow-hidden border-y border-border/30 py-10">
+    <p className="mb-8 text-center text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+      They trusted us to run their highest-stakes programs
+    </p>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
+      <div className="flex animate-marquee items-center gap-16">
+        {[...clientLogos, ...clientLogos, ...clientLogos].map((logo, i) => (
+          <img
+            key={i}
+            src={logo.src}
+            alt={logo.alt}
+            className="h-10 w-auto shrink-0 brightness-0 invert opacity-50 grayscale"
+          />
+        ))}
+      </div>
+    </div>
   </section>
 );
 
@@ -310,14 +348,7 @@ const SocialProofSection = () => (
         </div>
       </motion.div>
 
-      {/* Client Logos */}
-      <motion.div variants={fadeUp} className="mt-16 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-        {["Nike", "Samsung", "HP", "Oracle", "Adidas", "Nokia", "Secureworks"].map((logo) => (
-          <span key={logo} className="text-lg font-semibold tracking-wide text-muted-foreground/40 uppercase">
-            {logo}
-          </span>
-        ))}
-      </motion.div>
+      {/* Review Badges */}
 
       {/* Review Badges */}
       <motion.div variants={fadeUp} className="mt-12 flex flex-wrap items-center justify-center gap-8">
@@ -485,6 +516,7 @@ const Index = () => (
     <StickyBar />
     <main>
       <Hero />
+      <LogoMarquee />
       <ProblemSection />
       <ShiftSection />
       <ServicesSection />
