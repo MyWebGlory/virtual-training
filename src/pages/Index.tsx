@@ -205,7 +205,10 @@ const ServicesSection = () => (
       <motion.p variants={fadeUp} className="mt-4 text-center text-muted-foreground">
         One reliable team. Every session. No surprises.
       </motion.p>
-      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <motion.div variants={fadeUp} className="mt-10 overflow-hidden rounded-xl border border-border/30">
+        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-64 object-cover" loading="lazy" />
+      </motion.div>
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((s) => (
           <motion.div
             key={s.label}
