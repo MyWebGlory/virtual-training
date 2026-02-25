@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import vmLogo from "@/assets/vm-logo-white.png";
-import heroBg from "@/assets/hero-bg.webp";
+import heroThumbnail from "@/assets/hero-video-thumbnail.png";
 import controlRoom from "@/assets/virtual-events-control-room.webp";
 import videoProduction from "@/assets/video-production.webp";
 import meetingProsVideo from "@/assets/meeting-pros-video.mp4";
@@ -415,7 +415,7 @@ const Hero = () => {
           muted
           playsInline
           preload="auto"
-          poster={heroBg}
+          poster={heroThumbnail}
           disablePictureInPicture
           controlsList="nodownload nofullscreen noremoteplayback"
           className="h-[130%] w-full object-cover opacity-25 pointer-events-none select-none"
