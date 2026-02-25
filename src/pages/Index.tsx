@@ -51,7 +51,7 @@ const clientLogos = [
   { src: logoSecureworks, alt: "Secureworks" },
 ];
 
-const CALENDLY = "https://calendly.com/austin-vmproducers";
+const CALENDLY = "https://calendly.com/austin-vmproducers/virtual-producer-introduction-call";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
