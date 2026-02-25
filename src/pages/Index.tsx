@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useMotionValueEvent, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent, useInView, useAnimationControls } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
 import {
   Monitor, Users, BarChart3, Wrench, ClipboardCheck, UserCheck,
@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import vmLogo from "@/assets/vm-logo-white.png";
 import heroBg from "@/assets/hero-bg.webp";
+import heroBgVideo from "@/assets/hero-video.mp4";
 import controlRoom from "@/assets/virtual-events-control-room.webp";
 import videoProduction from "@/assets/video-production.webp";
 import meetingProsVideo from "@/assets/meeting-pros-video.mp4";
@@ -134,7 +135,7 @@ const FloatingIcons = ({ icons, count = 10, className = "" }: FloatingIconsProps
 };
 
 // ─── Animated Counter ───
-const AnimatedCounter = ({ target, className = "" }: { target: string; className?: string }) => {
+const AnimatedCounter = ({ target, className = "", delay = 0 }: { target: string; className?: string; delay?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
   const [display, setDisplay] = useState("0");
@@ -147,19 +148,22 @@ const AnimatedCounter = ({ target, className = "" }: { target: string; className
     const num = parseInt(numStr.replace(/,/g, ''));
     const prefix = target.slice(0, target.indexOf(numStr[0]));
     const suffix = target.slice(target.indexOf(numStr[0]) + numStr.length);
-    const duration = 2200;
-    const startTime = performance.now();
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(eased * num);
-      setDisplay(`${prefix}${current.toLocaleString()}${suffix}`);
-      if (progress < 1) requestAnimationFrame(tick);
-      else setDisplay(target);
-    };
-    requestAnimationFrame(tick);
-  }, [isInView, target]);
+    const duration = 1800;
+    const timer = setTimeout(() => {
+      const startTime = performance.now();
+      const tick = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(eased * num);
+        setDisplay(`${prefix}${current.toLocaleString()}${suffix}`);
+        if (progress < 1) requestAnimationFrame(tick);
+        else setDisplay(target);
+      };
+      requestAnimationFrame(tick);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [isInView, target, delay]);
 
   return <span ref={ref} className={className}>{display}</span>;
 };
@@ -191,6 +195,60 @@ const AnimatedCheck = ({ delay = 0, color = "primary" }: { delay?: number; color
           transition={{ delay: delay + 0.2, duration: 0.4, ease: "easeOut" }}
         />
       </motion.svg>
+    </div>
+  );
+};
+
+// ─── Scroll-driven Checkbox ───
+const ScrollCheckbox = ({ checked }: { checked: boolean }) => {
+  const strokeColor = "hsl(142, 69%, 48%)";
+  const bgColor = "hsl(142, 69%, 48%, 0.12)";
+  const prevRef = useRef(false);
+  const pulseControls = useAnimationControls();
+  const scaleControls = useAnimationControls();
+
+  useEffect(() => {
+    if (checked && !prevRef.current) {
+      // pulse ripple ring
+      pulseControls.start({ scale: [1, 2.2], opacity: [0.6, 0], transition: { duration: 0.5, ease: "easeOut" } });
+      // box scale pop
+      scaleControls.start({ scale: [1, 1.22, 0.95, 1], transition: { duration: 0.45, ease: "easeOut" } });
+    }
+    prevRef.current = checked;
+  }, [checked]);
+
+  return (
+    <div className="relative h-6 w-6 shrink-0">
+      {/* Ripple ring */}
+      <motion.div
+        className="absolute inset-0 rounded-md border-2 pointer-events-none"
+        style={{ borderColor: strokeColor }}
+        initial={{ scale: 1, opacity: 0 }}
+        animate={pulseControls}
+      />
+      {/* Box with scale pop */}
+      <motion.div animate={scaleControls} style={{ position: "absolute", inset: 0 }}>
+        <motion.div
+          className="absolute inset-0 rounded-md border-2"
+          animate={
+            checked
+              ? { borderColor: strokeColor, backgroundColor: bgColor }
+              : { borderColor: "hsl(240, 4%, 16%)", backgroundColor: "transparent" }
+          }
+          transition={{ duration: 0.3 }}
+        />
+        <motion.svg className="absolute inset-0 p-1" viewBox="0 0 24 24" fill="none">
+          <motion.path
+            d="M4 12l6 6L20 6"
+            stroke={strokeColor}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            animate={checked ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          />
+        </motion.svg>
+      </motion.div>
     </div>
   );
 };
@@ -276,10 +334,10 @@ const StickyBar = () => {
               </g>
             </svg>
           </div>
-          <div className="flex flex-col leading-tight">
-            <span className="font-bold text-lg tracking-tight">VIRTUAL</span>
-            <span className="font-bold text-lg tracking-tight">PRODUCERS</span>
-          </div>
+            <div className="flex flex-col leading-none -space-y-1">
+              <span className=" text-lg tracking-tight">VIRTUAL</span>
+              <span className=" text-lg tracking-tight">PRODUCERS</span>
+            </div>
         </div>
         <Button
           asChild
@@ -296,6 +354,43 @@ const StickyBar = () => {
   );
 };
 
+// ─── Social Proof Avatars ───
+const socialProofAvatars = [tJeanette, tKimR, tDean, tLesley, tTony, tGeorge];
+
+const SocialProofAvatars = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.7, delay: 1.95, ease: [0.22, 1, 0.36, 1] }}
+    className="flex items-center gap-3"
+  >
+    {/* Overlapping avatars */}
+    <div className="flex items-center">
+      {socialProofAvatars.map((src, i) => (
+        <div
+          key={i}
+          className="relative h-9 w-9 rounded-full border-2 border-background overflow-hidden shadow-md"
+          style={{ marginLeft: i === 0 ? 0 : "-10px", zIndex: socialProofAvatars.length - i }}
+        >
+          <img src={src} alt="Client" className="h-full w-full object-cover" />
+        </div>
+      ))}
+    </div>
+
+    {/* Stars + label */}
+    <div className="flex flex-col items-start gap-0.5">
+      <div className="flex items-center gap-0.5">
+        {[...Array(5)].map((_, i) => (
+          <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+        ))}
+      </div>
+      <span className="text-xs text-muted-foreground leading-none">
+        <span className="font-semibold text-foreground">200+</span> L&D leaders trust us
+      </span>
+    </div>
+  </motion.div>
+);
+
 // ─── Hero ───
 const Hero = () => {
   const ref = useRef(null);
@@ -303,7 +398,8 @@ const Hero = () => {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  // Remove fading effect: keep opacity always 1
+  const textOpacity = 1;
 
   const line1 = ["Your", "Facilitator", "Is"];
   const line2 = ["You", "Just"];
@@ -313,7 +409,16 @@ const Hero = () => {
     <section ref={ref} className="relative flex min-h-screen items-center justify-center px-6 overflow-hidden pt-16 pb-32">
       {/* Parallax bg with zoom */}
       <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale }}>
-        <img src={heroBg} alt="" className="h-[130%] w-full object-cover opacity-25" />
+        <video
+          src={heroBgVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+          className="h-[130%] w-full object-cover opacity-25 pointer-events-none select-none"
+        />
       </motion.div>
 
       {/* Multi-layer gradient overlays */}
@@ -380,14 +485,14 @@ const Hero = () => {
           initial={{ opacity: 0, y: 25, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-sm font-medium text-primary backdrop-blur-md"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/60 bg-blue-500/20 px-5 py-2 text-sm font-semibold"
         >
           <motion.span
-            className="h-2 w-2 rounded-full bg-primary"
+            className="h-2 w-2 rounded-full bg-red-500 shadow shadow-red-300"
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          2,000+ Events Produced. Zero Failures. Seriously.
+          #1 Live Producer for Corporate Cohorts
         </motion.div>
 
         {/* Headline: word-by-word cinematic reveal */}
@@ -454,8 +559,8 @@ const Hero = () => {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 flex flex-col items-center justify-center gap-4"
+          transition={{ duration: 0.8, delay: 1.65, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-10 flex flex-col items-center gap-1"
         >
           <div className="relative">
             {/* Pulse ring 1 */}
@@ -482,21 +587,26 @@ const Hero = () => {
             </Button>
           </div>
           <motion.span
-            className="text-sm text-muted-foreground mt-4"
+            className="text-sm text-muted-foreground mt-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2.2 }}
+            transition={{ delay: 1.8 }}
           >
             Free strategy call · No commitment · 15 min
           </motion.span>
         </motion.div>
 
+        {/* Social proof avatars */}
+        <div className="mt-6 flex justify-center">
+          <SocialProofAvatars />
+        </div>
+
         {/* Stats with animated counters */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 2.0, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-16 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+          transition={{ duration: 0.8, delay: 2.1, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
         >
           {[
             { num: "2,000+", label: "Events Produced" },
@@ -511,6 +621,7 @@ const Hero = () => {
             >
               <AnimatedCounter
                 target={stat.num}
+                delay={2100}
                 className="text-2xl font-extrabold gradient-text-accent"
               />
               <div className="mt-1 text-xs text-muted-foreground tracking-wide uppercase">{stat.label}</div>
@@ -524,7 +635,7 @@ const Hero = () => {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
+        transition={{ delay: 2.6 }}
       >
         <motion.span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 font-medium">
           Scroll
@@ -555,12 +666,9 @@ const LogoMarquee = () => (
       viewport={{ once: true }}
       className="mb-10 text-center text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground relative z-10"
     >
-      Brands that don't gamble with their training programs
+      Brands that trust us with their training programs
     </motion.p>
     <div className="relative">
-      {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
       <div className="flex animate-marquee" style={{ width: "max-content" }}>
         {[0, 1].map((setIdx) => (
           <div key={setIdx} className="flex items-center gap-20 pr-20 flex-shrink-0">
@@ -569,7 +677,7 @@ const LogoMarquee = () => (
                 key={i}
                 src={logo.src}
                 alt={logo.alt}
-                className="h-12 w-auto flex-shrink-0 opacity-40 hover:opacity-80 transition-all duration-500 hover:scale-110"
+                className="h-12 w-auto flex-shrink-0 transition-all duration-500 hover:scale-110"
                 whileHover={{ filter: "brightness(1.3)" }}
               />
             ))}
@@ -783,8 +891,24 @@ const RealCostSection = () => (
 );
 
 // ─── Bold Qualifier Section ───
-const BoldQualifierSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+// Check order: left column (items 0,2,4) first, then right column (items 1,3,5)
+// Thresholds start at 0.20 so the unchecked state is visible before any check
+// triggers, and all complete by 0.48 so they're done while the section is still
+// comfortably centered. offset "start end" → "end start" = full entry-to-exit range.
+// Order: left col (0,2,4) at 0.20/0.32/0.44, right col (1,3,5) at 0.27/0.39/0.48
+const QUALIFIER_THRESHOLDS = [0.20, 0.27, 0.32, 0.39, 0.44, 0.48];
+
+const BoldQualifierSection = () => {
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const [checkedItems, setCheckedItems] = useState([false, false, false, false, false, false]);
+
+  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+    setCheckedItems(QUALIFIER_THRESHOLDS.map((threshold) => progress >= threshold));
+  });
+
+  return (
+  <section ref={sectionRef} className="px-6 py-28 relative overflow-hidden">
     <div
       className="absolute inset-0 opacity-30"
       style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.08), transparent 60%)" }}
@@ -825,7 +949,7 @@ const BoldQualifierSection = () => (
             transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="glass rounded-xl p-5 flex items-center gap-4 hover:border-primary/30 transition-all duration-300 group"
           >
-            <AnimatedCheck delay={0.3 + i * 0.12} />
+            <ScrollCheckbox checked={checkedItems[i]} />
             <div className="flex items-center gap-3 flex-1">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                 <item.icon className="h-5 w-5 text-primary" />
@@ -902,7 +1026,8 @@ const BoldQualifierSection = () => (
       </motion.div>
     </motion.div>
   </section>
-);
+  );
+};
 
 // ─── The Shift ───
 const ShiftSection = () => {
