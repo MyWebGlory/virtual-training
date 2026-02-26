@@ -458,7 +458,7 @@ const ThankYouHero = () => {
             {formattedDate ? `See you on ${formattedDate}` : "We confirm within 24 hours"}
           </p>
           <p className="text-xs text-muted-foreground">
-            {hostFirstName ?? "Austin"} will personally review your event and prepare a custom strategy outline before you speak. Come ready — this call will be sharp and actionable from minute one.
+            {hostFirstName ?? "Austin"} will personally review your event and prepare a custom strategy outline before you speak. Come ready, this call will be sharp and actionable from minute one.
           </p>
         </div>
       </motion.div>
