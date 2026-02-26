@@ -489,11 +489,11 @@ const Hero = () => {
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/60 bg-blue-500/20 px-5 py-2 text-sm font-semibold"
         >
           <motion.span
-            className="h-2 w-2 rounded-full bg-red-500 shadow shadow-red-300"
+            className="h-2 w-2 rounded-full bg-green-500 shadow shadow-green-300"
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          #1 Live Producer for Corporate Cohorts
+          #1 Live Producer for Successfull Corporate Cohorts
         </motion.div>
 
         {/* Headline: word-by-word cinematic reveal */}
@@ -603,7 +603,7 @@ const Hero = () => {
           >
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
               <motion.span
-                className="h-1.5 w-1.5 rounded-full bg-amber-400"
+                className="h-1.5 w-1.5 rounded-full bg-red-400"
                 animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
