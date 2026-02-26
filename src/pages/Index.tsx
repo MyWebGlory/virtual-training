@@ -595,6 +595,21 @@ const Hero = () => {
           >
             Free strategy call · No commitment · 15 min
           </motion.span>
+          <motion.div
+            className="flex items-center gap-2 mt-3 text-sm"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.0 }}
+          >
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+              <motion.span
+                className="h-1.5 w-1.5 rounded-full bg-amber-400"
+                animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+              Only 4 new clients per month, spots are filling
+            </span>
+          </motion.div>
         </motion.div>
 
         {/* Social proof avatars */}
@@ -990,6 +1005,16 @@ const BoldQualifierSection = () => {
             </a>
           </Button>
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="mt-5 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>We only onboard <strong className="text-foreground">4 new clients per month.</strong> If you're a fit, don't wait.</span>
+        </motion.div>
       </motion.div>
 
       {/* Not for you section, with X marks */}
@@ -1573,16 +1598,17 @@ const FounderSection = () => (
           <p className="mt-4 text-muted-foreground leading-relaxed text-lg">
             If you're running high-stakes training programs, I'd love to be the person who makes tech completely invisible for you. Let's talk.
           </p>
-          <div className="mt-8 flex flex-wrap gap-4 text-sm text-muted-foreground">
-            <a href="tel:4043371539" className="flex items-center gap-2 hover:text-primary transition-all duration-300 glass rounded-lg px-4 py-2 hover:border-primary/30 hover:-translate-y-0.5">
-              <Phone className="h-4 w-4" /> 404.337.1539
-            </a>
-            <a href="mailto:austin@vproducers.com" className="flex items-center gap-2 hover:text-primary transition-all duration-300 glass rounded-lg px-4 py-2 hover:border-primary/30 hover:-translate-y-0.5">
-              <Mail className="h-4 w-4" /> austin@vproducers.com
-            </a>
-            <a href="https://www.linkedin.com/in/talley-austin" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary transition-all duration-300 glass rounded-lg px-4 py-2 hover:border-primary/30 hover:-translate-y-0.5">
-              <Linkedin className="h-4 w-4" /> LinkedIn
-            </a>
+          <div className="mt-8">
+            <Button
+              asChild
+              size="lg"
+              className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.5)] transition-all duration-300"
+            >
+              <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+                Book a Call with Austin
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </a>
+            </Button>
           </div>
         </motion.div>
       </div>
@@ -1795,35 +1821,29 @@ const FinalCTA = () => {
           </div>
         </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1.05 }}
+          className="mt-8 flex items-center justify-center gap-2"
+        >
+          <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            We only onboard <strong className="text-amber-100 mx-1">4 new clients per month.</strong>
+            <span className="text-amber-300/70">You've found us, don't lose your spot.</span>
+          </span>
+        </motion.div>
+
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 1.2 }}
-          className="mt-8 text-sm text-muted-foreground"
+          className="mt-6 text-sm text-muted-foreground"
         >
-          Or skip the form and reach out directly:
+          15 minutes. One conversation. Zero pressure.
         </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 1.3 }}
-          className="mt-4 flex flex-wrap items-center justify-center gap-6 text-sm"
-        >
-          <a
-            href="tel:4043371539"
-            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 glass rounded-full px-5 py-2.5 hover:border-primary/30"
-          >
-            <Phone className="h-4 w-4" /> 404.337.1539
-          </a>
-          <a
-            href="mailto:austin@vproducers.com"
-            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 glass rounded-full px-5 py-2.5 hover:border-primary/30"
-          >
-            <Mail className="h-4 w-4" /> austin@vproducers.com
-          </a>
-        </motion.div>
       </motion.div>
 
       {/* Bottom decorative line */}
