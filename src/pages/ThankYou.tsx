@@ -4,10 +4,10 @@ import {
   CheckCircle2, Star, Phone, Mail, Linkedin, Clock,
   Lock, ArrowRight, ArrowLeft, Users, Monitor, BarChart3,
   Wrench, ClipboardCheck, UserCheck, Zap, Shield, Target,
-  Headphones, type LucideIcon
+  Headphones, Calendar, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import logoNike from "@/assets/logos/nike.png";
 import logoHp from "@/assets/logos/hp.png";
@@ -224,8 +224,64 @@ const Header = () => (
   </header>
 );
 
+// ─── Parse Calendly URL params ───
+function useCalendlyParams() {
+  const [searchParams] = useSearchParams();
+
+  const get = (key: string) => {
+    const val = searchParams.get(key);
+    return val && val.trim() !== "" ? val.trim() : null;
+  };
+
+  const firstName = get("invitee_first_name");
+  const lastName = get("invitee_last_name");
+  const fullName = get("invitee_full_name") ?? (firstName || lastName ? [firstName, lastName].filter(Boolean).join(" ") : null);
+  const displayName = fullName;
+
+  const startTimeRaw = get("event_start_time");
+  const endTimeRaw = get("event_end_time");
+
+  let formattedDate: string | null = null;
+  let formattedTime: string | null = null;
+  let formattedEndTime: string | null = null;
+
+  if (startTimeRaw) {
+    try {
+      const d = new Date(startTimeRaw);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+        formattedTime = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+      }
+    } catch {}
+  }
+
+  if (endTimeRaw) {
+    try {
+      const d = new Date(endTimeRaw);
+      if (!isNaN(d.getTime())) {
+        formattedEndTime = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+      }
+    } catch {}
+  }
+
+  const assignedTo = get("assigned_to");
+  const hostFirstName = assignedTo ? assignedTo.split(" ")[0] : null;
+  const platform = get("answer_6");
+  const participantCount = get("answer_5");
+
+  return { displayName, formattedDate, formattedTime, formattedEndTime, assignedTo, hostFirstName, platform, participantCount };
+}
+
 // ─── Hero Section ───
-const ThankYouHero = () => (
+const ThankYouHero = () => {
+  const { displayName, formattedDate, formattedTime, formattedEndTime, assignedTo, hostFirstName, platform, participantCount } = useCalendlyParams();
+
+  const greeting = displayName ? `See you soon, ${displayName.split(" ")[0]}.` : "You're all set.";
+  const headline = displayName
+    ? <>You just made the best move for your{" "}<span className="shimmer-text">virtual training program.</span></>
+    : <>You just made the best move for your{" "}<span className="shimmer-text">virtual training program.</span></>;
+
+  return (
   <section className="relative px-6 pt-28 pb-20 overflow-hidden">
     {/* Background effects */}
     <div
@@ -287,7 +343,7 @@ const ThankYouHero = () => (
             />
             {/* Gradient overlay at bottom */}
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-3 px-3">
-              <p className="text-sm font-bold text-white leading-tight">Austin Talley</p>
+              <p className="text-sm font-bold text-white leading-tight">{assignedTo ?? "Austin Talley"}</p>
               <p className="text-[11px] text-white/70 leading-tight">Founder & CEO</p>
               <div className="flex items-center gap-1 mt-1">
                 {[...Array(5)].map((_, i) => (
@@ -300,10 +356,12 @@ const ThankYouHero = () => (
         </div>
 
         {/* Big headline */}
-        <div className="flex-1 flex items-center min-h-[160px]">
+        <div className="flex-1 flex flex-col justify-center min-h-[160px] gap-2">
+          {displayName && (
+            <p className="text-emerald-400 font-semibold text-lg tracking-tight">{greeting}</p>
+          )}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-[1.1] tracking-tight">
-            You just made the best move for your{" "}
-            <span className="shimmer-text">virtual training program.</span>
+            {headline}
           </h1>
         </div>
       </motion.div>
@@ -320,11 +378,75 @@ const ThankYouHero = () => (
         <span className="text-primary font-semibold keyword-glow">dominate.</span>
       </motion.p>
 
+      {/* Meeting details card */}
+      {(formattedDate || formattedTime || platform || participantCount) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-w-2xl"
+        >
+          {formattedDate && (
+            <div className="flex items-start gap-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Calendar className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400/70 mb-0.5">Date</p>
+                <p className="text-sm font-semibold text-foreground">{formattedDate}</p>
+                {formattedTime && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formattedTime}{formattedEndTime ? ` → ${formattedEndTime}` : ""}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {assignedTo && (
+            <div className="flex items-start gap-3 bg-primary/5 border border-primary/15 rounded-xl p-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <UserCheck className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-primary/70 mb-0.5">You're meeting with</p>
+                <p className="text-sm font-semibold text-foreground capitalize">{assignedTo.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Founder & CEO</p>
+              </div>
+            </div>
+          )}
+
+          {platform && (
+            <div className="flex items-start gap-3 bg-blue-500/5 border border-blue-500/15 rounded-xl p-4">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Monitor className="w-4 h-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-400/70 mb-0.5">Platform</p>
+                <p className="text-sm font-semibold text-foreground">{platform}</p>
+              </div>
+            </div>
+          )}
+
+          {participantCount && (
+            <div className="flex items-start gap-3 bg-amber-500/5 border border-amber-500/15 rounded-xl p-4">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Users className="w-4 h-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-400/70 mb-0.5">Cohort Size</p>
+                <p className="text-sm font-semibold text-foreground">{participantCount} participants</p>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
       {/* Confirmation notice */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="flex items-start gap-3 bg-primary/5 border border-primary/15 rounded-xl p-4 mb-6 max-w-2xl"
       >
         <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -333,10 +455,10 @@ const ThankYouHero = () => (
         <div>
           <p className="text-sm font-semibold mb-0.5 flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            We confirm within 24 hours
+            {formattedDate ? `See you on ${formattedDate}` : "We confirm within 24 hours"}
           </p>
           <p className="text-xs text-muted-foreground">
-            Austin will personally review your event and prepare a custom strategy outline before you speak. Come ready, this call will be sharp and actionable from minute one.
+            {hostFirstName ?? "Austin"} will personally review your event and prepare a custom strategy outline before you speak. Come ready — this call will be sharp and actionable from minute one.
           </p>
         </div>
       </motion.div>
@@ -345,7 +467,7 @@ const ThankYouHero = () => (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, delay: 0.7 }}
+        transition={{ duration: 0.7, delay: 0.75 }}
         className="flex items-center gap-2 text-sm text-muted-foreground mb-10"
       >
         <span className="inline-flex items-center justify-center flex-shrink-0">
@@ -360,7 +482,7 @@ const ThankYouHero = () => (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.85 }}
+        transition={{ duration: 0.7, delay: 0.9 }}
       >
         <Button
           asChild
@@ -376,7 +498,8 @@ const ThankYouHero = () => (
       </motion.div>
     </div>
   </section>
-);
+  );
+};
 
 // ─── Logo Marquee ───
 const LogoMarquee = () => (
