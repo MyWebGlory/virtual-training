@@ -40,6 +40,10 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
+    <script>
+      // Capture Calendly redirect params BEFORE any module JS loads
+      (function(){try{var sp=new URLSearchParams(window.location.search);var keys=["invitee_first_name","invitee_last_name","invitee_full_name","event_start_time","event_end_time","assigned_to","answer_5","answer_6"];var p={};var f=false;for(var i=0;i<keys.length;i++){var v=sp.get(keys[i]);if(v&&v.trim()){p[keys[i]]=v.trim();f=true;}}if(f)sessionStorage.setItem("calendly_params",JSON.stringify(p));}catch(e){}})();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- Calendly popup widget -->
     <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">

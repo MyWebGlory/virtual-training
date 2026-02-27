@@ -39,22 +39,24 @@ import tNatasha from "@/assets/testimonials/natasha-dolph.png";
 import tMelissa from "@/assets/testimonials/melissa-dawn-simkins.png";
 
 const clientLogos = [
-  { src: logoNike, alt: "Nike" },
+  { src: logoNike, alt: "Nike", brighten: true },
   { src: logoSamsung, alt: "Samsung" },
   { src: logoHp, alt: "HP" },
   { src: logoOracle, alt: "Oracle" },
-  { src: logoAdidas, alt: "Adidas" },
+  { src: logoAdidas, alt: "Adidas", brighten: true },
   { src: logoNokia, alt: "Nokia" },
   { src: logoChevrolet, alt: "Chevrolet" },
-  { src: logoAngryOrchard, alt: "Angry Orchard" },
+  { src: logoAngryOrchard, alt: "Angry Orchard", brighten: true },
   { src: logoAtlantaUnited, alt: "Atlanta United" },
-  { src: logoSecureworks, alt: "Secureworks" },
+  { src: logoSecureworks, alt: "Secureworks", brighten: true },
 ];
 
 const CALENDLY = "https://calendly.com/austin-vmproducers/virtual-producer-introduction-call";
+const CALENDLY_FALLBACK = "https://calendly.com/austin-vmproducers/virtual-producer-consultation";
 
-// Module-level setter — wired up by CalendlyPopup on mount
+// Module-level setter, wired up by CalendlyPopup on mount
 let _setCalendlyOpen: ((v: boolean) => void) | null = null;
+let _setFallbackCalendlyOpen: ((v: boolean) => void) | null = null;
 
 // Intercepts the click for GTM (href stays), opens preloaded popup instead
 function openCalendlyPopup(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -64,10 +66,17 @@ function openCalendlyPopup(e: React.MouseEvent<HTMLAnchorElement>) {
   }
 }
 
+function openFallbackCalendlyPopup(e: React.MouseEvent<HTMLButtonElement>) {
+  e.preventDefault();
+  if (_setFallbackCalendlyOpen) {
+    _setFallbackCalendlyOpen(true);
+  }
+}
+
 // ─── Calendly Preloaded Popup ───
 // Programmatically initialises the inline widget as soon as window.Calendly is
 // available (polls every 100 ms). The overlay stays invisible (opacity-0 /
-// pointer-events-none) until a button is clicked — the iframe is fully loaded
+// pointer-events-none) until a button is clicked, the iframe is fully loaded
 // in the background so the popup appears instantly.
 function CalendlyPopup() {
   const [open, setOpen] = useState(false);
@@ -136,7 +145,7 @@ function CalendlyPopup() {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={close} />
       {/* Panel */}
-      <div className="absolute inset-3 md:inset-6 lg:inset-10 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div className="absolute inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col">
         <button
           onClick={close}
           aria-label="Close"
@@ -155,6 +164,92 @@ function CalendlyPopup() {
   );
 }
 
+// ─── Calendly Fallback Popup (smaller sessions link) ───
+function CalendlyFallbackPopup() {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialised = useRef(false);
+
+  useEffect(() => {
+    _setFallbackCalendlyOpen = setOpen;
+    return () => { _setFallbackCalendlyOpen = null; };
+  }, []);
+
+  useEffect(() => {
+    if (initialised.current) return;
+    const tryInit = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const Cal = (window as any).Calendly;
+      if (Cal && typeof Cal.initInlineWidget === "function" && containerRef.current) {
+        Cal.initInlineWidget({ url: CALENDLY_FALLBACK, parentElement: containerRef.current });
+        initialised.current = true;
+      }
+    };
+    tryInit();
+    const interval = setInterval(() => {
+      if (initialised.current) { clearInterval(interval); return; }
+      tryInit();
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  const close = () => setOpen(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] transition-all duration-300"
+      style={{ opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none" }}
+      aria-modal={open}
+      role="dialog"
+      aria-label="Schedule a call for smaller sessions"
+    >
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={close} />
+      <div className="absolute inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col">
+        <button
+          onClick={close}
+          aria-label="Close"
+          className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
+        >
+          <X className="h-5 w-5 text-gray-700" />
+        </button>
+        <div
+          ref={containerRef}
+          className="w-full flex-1"
+          style={{ minWidth: "320px", minHeight: "500px" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Fallback CTA button (quiet, for disqualified segments) ───
+const FallbackButton = () => (
+  <div className="mt-6 pt-5 border-t border-muted-foreground/10 text-center">
+    <p className="text-xs text-muted-foreground/50 mb-3 leading-relaxed">
+      This program is designed for structured corporate cohorts of 50+ participants.<br />
+      If you're running smaller sessions, we offer a different support format.
+    </p>
+    <button
+      onClick={openFallbackCalendlyPopup}
+      className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 underline underline-offset-2 transition-colors cursor-pointer"
+    >
+      Explore options for smaller programs →
+    </button>
+  </div>
+);
+
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
@@ -169,13 +264,13 @@ const FloatingBlobs = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <motion.div
       className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-20"
-      style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.25), transparent 70%)" }}
+      style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.25), transparent 70%)" }}
       animate={{ x: [0, 30, -20, 0], y: [0, -25, 20, 0], scale: [1, 1.05, 0.98, 1] }}
       transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
     />
     <motion.div
       className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full opacity-15"
-      style={{ background: "radial-gradient(circle, hsl(24 85% 48% / 0.2), transparent 70%)" }}
+      style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.2), transparent 70%)" }}
       animate={{ x: [0, -25, 15, 0], y: [0, 20, -30, 0], scale: [1, 0.97, 1.04, 1] }}
       transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 3 }}
     />
@@ -273,8 +368,8 @@ const AnimatedCounter = ({ target, className = "", delay = 0 }: { target: string
 const AnimatedCheck = ({ delay = 0, color = "primary" }: { delay?: number; color?: "primary" | "destructive" }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-20px" });
-  const strokeColor = color === "primary" ? "hsl(43, 65%, 50%)" : "hsl(0, 84%, 60%)";
-  const bgColor = color === "primary" ? "hsl(43, 65%, 50%, 0.12)" : "hsl(0, 84%, 60%, 0.08)";
+  const strokeColor = color === "primary" ? "hsl(216, 90%, 58%)" : "hsl(0, 84%, 60%)";
+  const bgColor = color === "primary" ? "hsl(216, 90%, 58%, 0.12)" : "hsl(0, 84%, 60%, 0.08)";
 
   return (
     <div ref={ref} className="relative h-6 w-6 shrink-0">
@@ -443,11 +538,12 @@ const StickyBar = () => {
         <Button
           asChild
           size="sm"
-          className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_20px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_40px_hsl(38,90%,55%/0.5)] transition-all duration-300"
+          className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_20px_hsl(216,90%,58%/0.3)] hover:shadow-[0_0_40px_hsl(216,90%,58%/0.5)] transition-all duration-300 text-xs sm:text-sm px-3 sm:px-4"
         >
           <a href={CALENDLY} onClick={openCalendlyPopup}>
-            Get a Dedicated Producer
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <span className="hidden sm:inline">Get a Dedicated Producer</span>
+            <span className="sm:hidden">Book a Call</span>
+            <ArrowRight className="ml-1.5 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
           </a>
         </Button>
       </div>
@@ -482,7 +578,7 @@ const SocialProofAvatars = () => (
     <div className="flex flex-col items-start gap-0.5">
       <div className="flex items-center gap-0.5">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+          <Star key={i} className="h-3.5 w-3.5 fill-blue-400 text-blue-400" />
         ))}
       </div>
       <span className="text-xs text-muted-foreground leading-none">
@@ -507,7 +603,7 @@ const Hero = () => {
   const line3 = ["Don't", "See", "It", "Yet."];
 
   return (
-    <section ref={ref} className="relative flex min-h-screen items-center justify-center px-6 overflow-hidden pt-16 pb-32">
+    <section ref={ref} className="relative flex min-h-screen items-center justify-center px-4 sm:px-6 overflow-hidden pt-16 pb-16 sm:pb-24 md:pb-32">
       {/* Parallax bg with zoom */}
       <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale }}>
         <video
@@ -528,7 +624,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 20%, hsl(38 90% 55% / 0.18), transparent 50%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 20%, hsl(216 90% 58% / 0.18), transparent 50%)" }}
       />
       <div
         className="absolute inset-0"
@@ -536,7 +632,7 @@ const Hero = () => {
       />
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 80% 60%, hsl(38 90% 55% / 0.06), transparent 40%)" }}
+        style={{ background: "radial-gradient(ellipse at 80% 60%, hsl(216 90% 58% / 0.06), transparent 40%)" }}
       />
 
       {/* Animated dot grid with parallax */}
@@ -558,7 +654,7 @@ const Hero = () => {
       {/* Animated energy orbs */}
       <motion.div
         className="absolute top-1/4 left-[15%] w-[500px] h-[500px] rounded-full"
-        style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.12), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.12), transparent 60%)" }}
         animate={{ x: [0, 40, -30, 0], y: [0, -30, 40, 0], scale: [1, 1.1, 0.95, 1] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -570,7 +666,7 @@ const Hero = () => {
       />
       <motion.div
         className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full"
-        style={{ background: "radial-gradient(circle, hsl(43 65% 50% / 0.08), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.08), transparent 60%)" }}
         animate={{ x: [0, 20, -25, 0], y: [0, -35, 15, 0] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 7 }}
       />
@@ -588,18 +684,17 @@ const Hero = () => {
           initial={{ opacity: 0, y: 25, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/60 bg-blue-500/20 px-5 py-2 text-sm font-semibold"
+          className="mb-6 sm:mb-8 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-blue-500/60 bg-blue-500/20 px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold"
         >
           <motion.span
             className="h-2 w-2 rounded-full bg-green-500 shadow shadow-green-300"
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          #1 Live Producer for Successfull Corporate Cohorts
+          #1 Producer for Successful Corporate Training Events
         </motion.div>
-
         {/* Headline: word-by-word cinematic reveal */}
-        <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
+        <h1 className="text-[2rem] font-extrabold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
           {line1.map((word, i) => (
             <motion.span
               key={`l1-${i}`}
@@ -613,7 +708,7 @@ const Hero = () => {
           ))}
           <br />
           <motion.span
-            className="inline-block shimmer-text"
+            className="inline-block shimmer-text relative z-10 pb-3"
             initial={{ opacity: 0, y: 50, scale: 0.85 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1.1, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
@@ -623,7 +718,7 @@ const Hero = () => {
           {line2.map((word, i) => (
             <motion.span
               key={`l2-${i}`}
-              className="inline-block text-muted-foreground/60 mr-[0.22em]"
+              className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
               initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, delay: 0.85 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
@@ -635,7 +730,7 @@ const Hero = () => {
           {line3.map((word, i) => (
             <motion.span
               key={`l3-${i}`}
-              className="inline-block text-muted-foreground/60 mr-[0.22em]"
+              className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
               initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, delay: 1.05 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
@@ -650,9 +745,9 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 1.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed"
+          className="mx-auto mt-5 sm:mt-8 max-w-2xl text-[15px] text-muted-foreground sm:text-lg md:text-xl leading-relaxed"
         >
-          They're teaching, managing chat, launching polls, opening breakout rooms, troubleshooting audio, and watching the clock , {" "}
+          They're teaching, managing chat, launching polls, opening breakout rooms, troubleshooting audio, and watching the clock, {" "}
           <span className="text-foreground font-semibold keyword-glow">all at the same time.</span>{" "}
           Something's gotta give. Usually, it's the{" "}
           <span className="text-primary/90 font-semibold">quality of your program.</span>
@@ -663,7 +758,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.65, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 flex flex-col items-center gap-1"
+          className="mt-7 sm:mt-10 flex flex-col items-center gap-1"
         >
           <div className="relative">
             {/* Pulse ring 1 */}
@@ -681,11 +776,11 @@ const Hero = () => {
             <Button
               asChild
               size="lg"
-              className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-7 text-lg font-bold shadow-[0_0_40px_hsl(38,90%,55%/0.5)] hover:shadow-[0_0_60px_hsl(38,90%,55%/0.7)] transition-all duration-500"
+              className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-7 py-5 text-base sm:px-12 sm:py-7 sm:text-lg font-bold shadow-[0_0_40px_hsl(216,90%,58%/0.5)] hover:shadow-[0_0_60px_hsl(216,90%,58%/0.7)] transition-all duration-500"
             >
               <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Get a Dedicated Producer
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-2" />
               </a>
             </Button>
           </div>
@@ -703,13 +798,14 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.0 }}
           >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-semibold text-blue-300 text-center leading-tight">
               <motion.span
-                className="h-1.5 w-1.5 rounded-full bg-red-400"
+                className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0"
                 animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
-              Only 4 new clients per month, spots are filling
+              <span className="hidden sm:inline">Only 4 new clients per month, to ensure focus, precision, and results. Spots are filling</span>
+              <span className="sm:hidden">Only 4 new clients/month. Spots are filling</span>
             </span>
           </motion.div>
         </motion.div>
@@ -724,7 +820,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 2.1, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+          className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6"
         >
           {[
             { num: "2,000+", label: "Events Produced" },
@@ -735,12 +831,12 @@ const Hero = () => {
               key={stat.label}
               whileHover={{ scale: 1.05, y: -4 }}
               transition={{ type: "spring", stiffness: 400 }}
-              className="glass rounded-xl px-6 py-4 text-center min-w-[140px] group cursor-default hover:border-primary/25 transition-colors duration-300"
+              className="glass rounded-xl px-4 py-3 sm:px-6 sm:py-4 text-center min-w-[100px] sm:min-w-[140px] group cursor-default hover:border-primary/25 transition-colors duration-300"
             >
               <AnimatedCounter
                 target={stat.num}
                 delay={2100}
-                className="text-2xl font-extrabold gradient-text-accent"
+                className="text-lg sm:text-2xl font-extrabold gradient-text-accent"
               />
               <div className="mt-1 text-xs text-muted-foreground tracking-wide uppercase">{stat.label}</div>
             </motion.div>
@@ -773,30 +869,31 @@ const Hero = () => {
 
 // ─── Logo Marquee ───
 const LogoMarquee = () => (
-  <section className="overflow-hidden border-y border-border/20 py-12 relative">
+  <section className="overflow-hidden border-y border-border/20 py-8 sm:py-12 relative">
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.04), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.04), transparent 60%)" }}
     />
     <motion.p
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="mb-10 text-center text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground relative z-10"
+      className="mb-6 sm:mb-10 text-center text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground relative z-10"
     >
       Brands that trust us with their training programs
     </motion.p>
     <div className="relative">
       <div className="flex animate-marquee" style={{ width: "max-content" }}>
         {[0, 1].map((setIdx) => (
-          <div key={setIdx} className="flex items-center gap-20 pr-20 flex-shrink-0">
+          <div key={setIdx} className="flex items-center gap-10 pr-10 sm:gap-16 sm:pr-16 md:gap-20 md:pr-20 flex-shrink-0">
             {clientLogos.map((logo, i) => (
               <motion.img
                 key={i}
                 src={logo.src}
                 alt={logo.alt}
-                className="h-12 w-auto flex-shrink-0 transition-all duration-500 hover:scale-110"
-                whileHover={{ filter: "brightness(1.3)" }}
+                className="h-8 sm:h-10 md:h-12 w-auto flex-shrink-0 transition-all duration-500 hover:scale-110"
+                style={logo.brighten ? { filter: "brightness(0) invert(1) opacity(0.75)" } : undefined}
+                whileHover={{ filter: logo.brighten ? "brightness(0) invert(1) opacity(1)" : "brightness(1.3)" }}
               />
             ))}
           </div>
@@ -829,7 +926,7 @@ const problems = [
 ];
 
 const ProblemSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <FloatingIcons icons={[AlertTriangle, Zap, Shield, Layers, XCircle]} count={8} />
     <div
       className="absolute inset-0 opacity-20"
@@ -845,12 +942,12 @@ const ProblemSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Let's be honest
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl">
         Here's What's <span className="shimmer-text">Actually Happening</span>
         <br />
-        <span className="text-2xl sm:text-3xl text-muted-foreground font-bold mt-2 block">In Your Virtual Classrooms Right Now</span>
+        <span className="text-lg sm:text-2xl md:text-3xl text-muted-foreground font-bold mt-2 block">In Your Virtual Classrooms Right Now</span>
       </motion.h2>
-      <div className="mt-16 grid gap-8 md:grid-cols-3 relative">
+      <div className="mt-10 sm:mt-16 grid gap-5 sm:gap-8 md:grid-cols-3 relative">
         <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-[2px] -translate-y-1/2 z-0">
            <motion.div
             className="h-full bg-gradient-to-r from-transparent via-line-accent/30 to-transparent"
@@ -867,9 +964,9 @@ const ProblemSection = () => (
             whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.7, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="relative group glass rounded-2xl p-8 transition-all duration-500 hover:border-primary/40 hover:-translate-y-3 hover:shadow-[0_0_50px_hsl(38,90%,55%/0.15)] z-10"
+            className="relative group glass rounded-2xl p-5 sm:p-6 md:p-8 transition-all duration-500 hover:border-primary/40 hover:-translate-y-3 hover:shadow-[0_0_50px_hsl(216,90%,58%/0.15)] z-10"
           >
-            <span className="absolute top-4 right-6 text-7xl font-extrabold text-primary/[0.07] select-none">{p.num}</span>
+            <span className="absolute top-4 right-6 text-5xl sm:text-7xl font-extrabold text-primary/[0.07] select-none">{p.num}</span>
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-icon-accent/10 border border-icon-accent/20 mb-6 group-hover:scale-110 group-hover:bg-icon-accent/20 group-hover:shadow-[0_0_20px_hsl(216,90%,58%/0.3)] transition-all duration-400">
               <p.icon className="h-7 w-7 text-icon-accent" />
             </div>
@@ -893,11 +990,11 @@ const ProblemSection = () => (
 
 // ─── The Real Cost Section ───
 const RealCostSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <FloatingIcons icons={[DollarSign, AlertTriangle, CheckCircle2, XCircle, BarChart3]} count={8} />
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 30% 60%, hsl(38 90% 55% / 0.06), transparent 50%)" }}
+      style={{ background: "radial-gradient(ellipse at 30% 60%, hsl(216 90% 58% / 0.06), transparent 50%)" }}
     />
     <motion.div
       className="mx-auto max-w-5xl relative z-10"
@@ -909,17 +1006,17 @@ const RealCostSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         The math nobody wants to do
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl mb-16">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl mb-10 sm:mb-16">
         What Does a <span className="shimmer-text">Failed Session</span> Actually Cost?
       </motion.h2>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-5 sm:gap-8 md:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="glass rounded-2xl p-8 border-l-4 border-l-destructive/60 hover:border-l-destructive transition-all duration-300"
+          className="glass rounded-2xl p-5 sm:p-6 md:p-8 border-l-4 border-l-destructive/60 hover:border-l-destructive transition-all duration-300"
         >
           <div className="flex items-center gap-3 mb-6">
             <motion.div
@@ -959,7 +1056,7 @@ const RealCostSection = () => (
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="rotating-border p-8"
+          className="rotating-border p-5 sm:p-6 md:p-8"
         >
           <div className="flex items-center gap-3 mb-6">
             <motion.div
@@ -1000,7 +1097,7 @@ const RealCostSection = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.4 }}
-        className="text-center mt-12 text-lg text-muted-foreground"
+        className="text-center mt-8 sm:mt-12 text-base sm:text-lg text-muted-foreground"
       >
         One bad session in a $30K program doesn't cost you $2,500. It costs you the <span className="text-foreground font-bold keyword-glow">$120K renewal.</span>
       </motion.p>
@@ -1026,10 +1123,10 @@ const BoldQualifierSection = () => {
   });
 
   return (
-  <section ref={sectionRef} className="px-6 py-28 relative overflow-hidden">
+  <section ref={sectionRef} className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <div
       className="absolute inset-0 opacity-30"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.08), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.08), transparent 60%)" }}
     />
     <FloatingIcons icons={[Target, DollarSign, Users, Shield, Clock, Headphones]} count={10} />
 
@@ -1043,16 +1140,16 @@ const BoldQualifierSection = () => {
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Real talk
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl">
         This Is <span className="shimmer-text">Specifically</span> For You If...
       </motion.h2>
-      <motion.p variants={fadeUp} className="text-center text-lg text-muted-foreground mt-4 mb-14">
+      <motion.p variants={fadeUp} className="text-center text-base sm:text-lg text-muted-foreground mt-4 mb-8 sm:mb-14">
         We're not for everyone. And we're cool with that. Here's who we <span className="text-foreground font-medium">thrive</span> with:
       </motion.p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {[
-          { icon: Users, text: "You're training 50 to 150+ participants per cohort" },
+          { icon: Users, text: "You're training 25 to 150+ participants per cohort" },
           { icon: Clock, text: "Your programs run 6 to 12+ sessions (not a one-off webinar)" },
           { icon: DollarSign, text: "Your program budgets are $20K+ (because quality isn't cheap)" },
           { icon: Target, text: "You're in medical, financial, enterprise, or leadership development" },
@@ -1065,20 +1162,20 @@ const BoldQualifierSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-30px" }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="glass rounded-xl p-5 flex items-center gap-4 hover:border-primary/30 transition-all duration-300 group"
+            className="glass rounded-xl p-3.5 sm:p-5 flex items-center gap-3 sm:gap-4 hover:border-primary/30 transition-all duration-300 group"
           >
             <ScrollCheckbox checked={checkedItems[i]} />
             <div className="flex items-center gap-3 flex-1">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                 <item.icon className="h-5 w-5 text-primary" />
               </div>
-              <span className="font-medium text-foreground/90">{item.text}</span>
+              <span className="font-medium text-foreground/90 text-sm sm:text-base">{item.text}</span>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <motion.div variants={fadeUp} className="mt-14 text-center">
+      <motion.div variants={fadeUp} className="mt-10 sm:mt-14 text-center">
         <motion.p
           className="text-xl font-bold text-foreground mb-2"
           initial={{ opacity: 0, y: 20 }}
@@ -1099,7 +1196,7 @@ const BoldQualifierSection = () => {
           <Button
             asChild
             size="lg"
-            className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.5)] transition-shadow"
+            className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-7 py-5 text-base sm:px-10 sm:py-6 sm:text-lg font-bold shadow-[0_0_30px_hsl(216,90%,58%/0.3)] hover:shadow-[0_0_50px_hsl(216,90%,58%/0.5)] transition-shadow"
           >
             <a href={CALENDLY} onClick={openCalendlyPopup}>
               Yes, That's Me, Let's Talk
@@ -1112,10 +1209,10 @@ const BoldQualifierSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mt-5 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+          className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground mt-5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span>We only onboard <strong className="text-foreground">4 new clients per month.</strong> If you're a fit, don't wait.</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>We only onboard <strong className="text-foreground">4 new clients per month</strong>, to ensure focus, precision, and results. If you're a fit, don't wait.</span>
         </motion.div>
       </motion.div>
 
@@ -1125,7 +1222,7 @@ const BoldQualifierSection = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="mt-16 glass rounded-xl p-8 max-w-xl mx-auto border-l-2 border-l-muted-foreground/20"
+        className="mt-12 sm:mt-16 glass rounded-xl p-5 sm:p-6 md:p-8 max-w-xl mx-auto border-l-2 border-l-muted-foreground/20"
       >
         <h3 className="mb-4 text-lg font-bold text-muted-foreground/70">Heads up, this is NOT for:</h3>
         <ul className="space-y-3">
@@ -1151,6 +1248,7 @@ const BoldQualifierSection = () => {
         <p className="mt-4 text-sm text-muted-foreground/60 italic">
           No shade. We just know where we do our best work.
         </p>
+        <FallbackButton />
       </motion.div>
     </motion.div>
   </section>
@@ -1165,7 +1263,7 @@ const ShiftSection = () => {
   const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 1.02]);
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-6 py-28">
+    <section ref={ref} className="relative overflow-hidden px-4 sm:px-6 py-16 sm:py-20 md:py-28">
       <motion.div className="absolute inset-0" style={{ y: bgY }}>
         <img src={controlRoom} alt="" className="h-[120%] w-full object-cover opacity-10" />
       </motion.div>
@@ -1179,12 +1277,12 @@ const ShiftSection = () => {
         viewport={{ once: true }}
         variants={stagger}
       >
-        <div className="grid items-center gap-14 md:grid-cols-2">
+        <div className="grid items-center gap-8 sm:gap-10 md:gap-14 md:grid-cols-2">
           <div>
             <motion.p variants={fadeUp} className="mb-4 text-sm font-bold uppercase tracking-[0.25em] text-primary">
               Imagine this instead
             </motion.p>
-            <motion.h2 variants={fadeUp} className="text-4xl font-extrabold sm:text-5xl leading-tight">
+            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl md:text-5xl leading-tight">
               You Teach.{" "}
               <span className="shimmer-text">We Run Everything Else.</span>
             </motion.h2>
@@ -1196,12 +1294,12 @@ const ShiftSection = () => {
             </motion.p>
             <motion.div
               variants={fadeUp}
-              className="mt-8 h-1 w-24 rounded-full bg-gradient-to-r from-primary to-line-accent glow-line-gold"
+              className="mt-8 h-1 w-24 rounded-full bg-gradient-to-r from-primary to-line-accent glow-line"
             />
           </div>
           <motion.div
             style={{ scale: imgScale }}
-            className="overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_40px_hsl(38,90%,55%/0.15)] hover:shadow-[0_0_60px_hsl(38,90%,55%/0.25)] transition-shadow duration-500"
+            className="overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_40px_hsl(216,90%,58%/0.15)] hover:shadow-[0_0_60px_hsl(216,90%,58%/0.25)] transition-shadow duration-500"
           >
             <video
               src={meetingProsVideo}
@@ -1268,7 +1366,7 @@ const HowItWorksSection = () => {
           {/* BG effects */}
           <div
             className="absolute inset-0 opacity-40"
-            style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(38 90% 55% / 0.06), transparent 50%)" }}
+            style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(216 90% 58% / 0.06), transparent 50%)" }}
           />
           <FloatingIcons icons={[ClipboardCheck, Phone, Wrench, Users, Monitor, Target]} count={10} />
 
@@ -1312,9 +1410,9 @@ const HowItWorksSection = () => {
               >
                 <defs>
                   <linearGradient id="stepLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="hsl(43, 65%, 50%)" />
-                    <stop offset="50%" stopColor="hsl(216, 90%, 58%)" />
-                    <stop offset="100%" stopColor="hsl(43, 65%, 50%)" />
+                    <stop offset="0%" stopColor="hsl(225, 85%, 52%)" />
+                    <stop offset="50%" stopColor="hsl(205, 95%, 72%)" />
+                    <stop offset="100%" stopColor="hsl(216, 90%, 58%)" />
                   </linearGradient>
                 </defs>
                 {/* Curved path through 4 quadrants: TL -> TR -> BL -> BR */}
@@ -1365,10 +1463,10 @@ const HowItWorksSection = () => {
                           animate={
                             activeStep >= i
                               ? {
-                                  borderColor: "hsl(43, 65%, 50%)",
-                                  boxShadow: "0 0 25px hsl(43, 65%, 50%, 0.3)",
+                                  borderColor: "hsl(216, 90%, 58%)",
+                                  boxShadow: "0 0 25px hsl(216, 90%, 58%, 0.3)",
                                 }
-                              : { borderColor: "hsl(43, 65%, 50%, 0.2)", boxShadow: "none" }
+                              : { borderColor: "hsl(216, 90%, 58%, 0.2)", boxShadow: "none" }
                           }
                           transition={{ delay: 0.3, duration: 0.5 }}
                         >
@@ -1396,7 +1494,7 @@ const HowItWorksSection = () => {
       </section>
 
       {/* Mobile: Regular stacked scroll */}
-      <section className="md:hidden px-6 py-28">
+      <section className="md:hidden px-4 sm:px-6 py-16 sm:py-20 md:py-28">
         <div className="mx-auto max-w-lg">
           <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">Dead simple</p>
           <h2 className="text-center text-3xl font-extrabold sm:text-4xl">
@@ -1405,9 +1503,9 @@ const HowItWorksSection = () => {
           <p className="text-center mt-4 text-muted-foreground max-w-md mx-auto">
             No red tape. No 6-week onboarding. Impact from session one.
           </p>
-          <div className="mt-10 space-y-6 relative">
+          <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6 relative">
             {/* Vertical connecting line */}
-            <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary/30 via-line-accent/30 to-primary/30" />
+            <div className="absolute left-[17px] sm:left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary/30 via-line-accent/30 to-primary/30" />
             {processSteps.map((step, i) => {
               const StepIcon = stepIcons[i];
               return (
@@ -1417,10 +1515,9 @@ const HowItWorksSection = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="glass rounded-2xl p-6 ml-12 relative"
+                  className="glass rounded-2xl p-4 sm:p-6 ml-10 sm:ml-12 relative"
                 >
-                  {/* Connector dot */}
-                  <div className="absolute -left-[36px] top-7 h-4 w-4 rounded-full bg-primary border-2 border-background shadow-[0_0_12px_hsl(43,65%,50%/0.4)]" />
+                  <div className="absolute -left-[34px] sm:-left-[36px] top-7 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full bg-primary border-2 border-background shadow-[0_0_12px_hsl(216,90%,58%/0.4)]" />
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold">
                       <StepIcon className="h-4 w-4" />
@@ -1449,7 +1546,7 @@ const services = [
 ];
 
 const ServicesSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <FloatingIcons icons={[Monitor, Users, BarChart3, Wrench, ClipboardCheck, UserCheck]} count={10} />
     <div
       className="absolute inset-0 opacity-20"
@@ -1465,7 +1562,7 @@ const ServicesSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Everything handled
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl">
         You Focus on <span className="shimmer-text">Teaching.</span>
         <br />
         We Handle <span className="gradient-text-accent">Literally Everything Else.</span>
@@ -1475,11 +1572,11 @@ const ServicesSection = () => (
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="mt-12 overflow-hidden rounded-2xl border border-border/20 shadow-[0_0_40px_hsl(38,90%,55%/0.1)] hover:shadow-[0_0_60px_hsl(38,90%,55%/0.2)] transition-shadow duration-500"
+        className="mt-10 sm:mt-12 overflow-hidden rounded-2xl border border-border/20 shadow-[0_0_40px_hsl(216,90%,58%/0.1)] hover:shadow-[0_0_60px_hsl(216,90%,58%/0.2)] transition-shadow duration-500"
       >
-        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-72 object-cover" loading="lazy" />
+        <img src={videoProduction} alt="Virtual Producers video production setup" className="w-full h-48 sm:h-60 md:h-72 object-cover" loading="lazy" />
       </motion.div>
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((s, i) => (
           <motion.div
             key={s.label}
@@ -1487,11 +1584,11 @@ const ServicesSection = () => (
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-30px" }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="group glass rounded-2xl p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-2 hover:shadow-[0_0_40px_hsl(38,90%,55%/0.12)]"
+            className="group glass rounded-2xl p-4 sm:p-6 transition-all duration-500 hover:border-primary/30 hover:-translate-y-2 hover:shadow-[0_0_40px_hsl(216,90%,58%/0.12)]"
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-icon-accent/10 border border-icon-accent/20 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-icon-accent/20 group-hover:shadow-[0_0_20px_hsl(216,90%,58%/0.3)] transition-all duration-400">
-                <s.icon className="h-6 w-6 text-icon-accent" />
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-icon-accent/10 border border-icon-accent/20 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-icon-accent/20 group-hover:shadow-[0_0_20px_hsl(216,90%,58%/0.3)] transition-all duration-400">
+                <s.icon className="h-5 w-5 sm:h-6 sm:w-6 text-icon-accent" />
               </div>
               <div>
                 <h3 className="font-bold text-lg group-hover:text-primary transition-colors duration-300">{s.label}</h3>
@@ -1593,7 +1690,7 @@ const TestimonialCard = ({ t, index }: { t: typeof testimonials[0]; index: numbe
     whileInView={{ opacity: 1, y: 0, scale: 1 }}
     viewport={{ once: true, margin: "-30px" }}
     transition={{ duration: 0.6, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
-    className="glass rounded-2xl p-6 flex flex-col gap-4 hover:border-primary/25 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_hsl(38,90%,55%/0.1)] break-inside-avoid mb-6 group"
+    className="glass rounded-2xl p-6 flex flex-col gap-4 hover:border-primary/25 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_hsl(216,90%,58%/0.1)] break-inside-avoid mb-6 group"
   >
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
@@ -1617,10 +1714,10 @@ const TestimonialCard = ({ t, index }: { t: typeof testimonials[0]; index: numbe
 );
 
 const SocialProofSection = () => (
-  <section className="relative overflow-hidden px-6 py-28">
+  <section className="relative overflow-hidden px-4 sm:px-6 py-16 sm:py-20 md:py-28">
     <div
       className="absolute inset-0 opacity-30"
-      style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(38 90% 55% / 0.08), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(216 90% 58% / 0.08), transparent 60%)" }}
     />
     <FloatingIcons icons={[Star, CheckCircle2, Users, Shield]} count={8} />
     <motion.div
@@ -1633,11 +1730,11 @@ const SocialProofSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Don't take our word for it
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl">
         Here's What Happens When You{" "}
         <span className="shimmer-text">Stop Winging It</span>
       </motion.h2>
-      <motion.p variants={fadeUp} className="text-center mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+      <motion.p variants={fadeUp} className="text-center mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
         Real feedback from L&amp;D leaders, facilitators, and program directors who made the switch.
       </motion.p>
 
@@ -1655,11 +1752,11 @@ const SocialProofSection = () => (
 
 // ─── Meet Austin ───
 const FounderSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <FloatingIcons icons={[Phone, Mail, Linkedin, Star, Users]} count={6} />
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(38 90% 55% / 0.06), transparent 50%)" }}
+      style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(216 90% 58% / 0.06), transparent 50%)" }}
     />
     <motion.div
       className="mx-auto max-w-4xl relative z-10"
@@ -1668,7 +1765,7 @@ const FounderSection = () => (
       viewport={{ once: true }}
       variants={stagger}
     >
-      <div className="flex flex-col items-center gap-12 md:flex-row md:items-start md:gap-14">
+      <div className="flex flex-col items-center gap-8 sm:gap-10 md:flex-row md:items-start md:gap-14">
         <motion.div
           initial={{ opacity: 0, x: -40, rotate: -3 }}
           whileInView={{ opacity: 1, x: 0, rotate: 0 }}
@@ -1680,9 +1777,9 @@ const FounderSection = () => (
             <img
               src={austinPhoto}
               alt="Austin Talley, Founder of Virtual Producers"
-              className="h-64 w-64 rounded-2xl object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="h-44 w-44 sm:h-56 sm:w-56 md:h-64 md:w-64 rounded-2xl object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
-            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_hsl(38,90%,55%/0.2)] group-hover:shadow-[0_0_50px_hsl(38,90%,55%/0.3)] transition-shadow duration-500" />
+            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_hsl(216,90%,58%/0.2)] group-hover:shadow-[0_0_50px_hsl(216,90%,58%/0.3)] transition-shadow duration-500" />
             {/* Decorative corner accents */}
             <div className="absolute -top-2 -left-2 w-6 h-6 border-t-2 border-l-2 border-primary/50 rounded-tl-lg" />
             <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-2 border-r-2 border-primary/50 rounded-br-lg" />
@@ -1690,21 +1787,21 @@ const FounderSection = () => (
         </motion.div>
         <motion.div variants={fadeUp}>
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-primary">From the founder</p>
-          <h2 className="text-4xl font-extrabold sm:text-5xl">Hey, I'm <span className="shimmer-text">Austin.</span></h2>
-          <p className="mt-6 text-muted-foreground leading-relaxed text-lg">
+          <h2 className="text-3xl font-extrabold sm:text-4xl md:text-5xl">Hey, I'm <span className="shimmer-text">Austin.</span></h2>
+          <p className="mt-4 sm:mt-6 text-muted-foreground leading-relaxed text-base sm:text-lg">
             I've spent <span className="text-foreground font-semibold">15+ years</span> in virtual production, and for most of that time, I watched incredible facilitators get buried under tech they never signed up to manage. It frustrated me every single time.
           </p>
-          <p className="mt-4 text-muted-foreground leading-relaxed text-lg">
-            So I built Virtual Producers to fix exactly that. Today, my team has produced <span className="text-primary font-semibold keyword-glow">2,000+ events</span> for <span className="text-primary font-semibold keyword-glow">350,000+ participants</span> worldwide, and we've never had a session fail. <span className="text-foreground font-bold">Not once.</span>
+          <p className="mt-4 text-muted-foreground leading-relaxed text-base sm:text-lg">
+            So I built Virtual Producers to fix exactly that. Today, my team has produced <span className="text-primary font-semibold keyword-glow">2,000+ events</span> for <span className="text-primary font-semibold keyword-glow">350,000+ participants</span> worldwide.
           </p>
-          <p className="mt-4 text-muted-foreground leading-relaxed text-lg">
+          <p className="mt-4 text-muted-foreground leading-relaxed text-base sm:text-lg">
             If you're running high-stakes training programs, I'd love to be the person who makes tech completely invisible for you. Let's talk.
           </p>
           <div className="mt-8">
             <Button
               asChild
               size="lg"
-              className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.5)] transition-all duration-300"
+              className="group bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-5 text-sm sm:px-8 sm:py-6 sm:text-base font-bold shadow-[0_0_30px_hsl(216,90%,58%/0.3)] hover:shadow-[0_0_50px_hsl(216,90%,58%/0.5)] transition-all duration-300"
             >
               <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Book a Call with Austin
@@ -1743,11 +1840,12 @@ const faqs = [
   {
     q: "What if we only need help for a few sessions?",
     a: "If you're running a multi-session cohort program, we're built for that. We don't do one-off webinars, not because we can't, but because the real value shows up when we're embedded in your program week after week. That's where consistency becomes your superpower.",
+    fallback: true,
   },
 ];
 
 const FAQSection = () => (
-  <section className="px-6 py-28 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-20 md:py-28 relative overflow-hidden">
     <FloatingIcons icons={[Zap, Shield, Monitor, Users, CheckCircle2]} count={6} />
     <motion.div
       className="mx-auto max-w-3xl relative z-10"
@@ -1759,12 +1857,12 @@ const FAQSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         We get it
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-4xl font-extrabold sm:text-5xl">
+      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl">
         You've Got <span className="shimmer-text">Questions.</span>
         <br />
-        <span className="text-2xl sm:text-3xl text-muted-foreground font-bold">We've Got Straight Answers.</span>
+        <span className="text-xl sm:text-2xl md:text-3xl text-muted-foreground font-bold">We've Got Straight Answers.</span>
       </motion.h2>
-      <motion.div variants={fadeUp} className="mt-14">
+      <motion.div variants={fadeUp} className="mt-8 sm:mt-14">
         <Accordion type="single" collapsible className="space-y-4">
           {faqs.map((faq, i) => (
             <AccordionItem
@@ -1777,6 +1875,7 @@ const FAQSection = () => (
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
                 {faq.a}
+                {faq.fallback && <FallbackButton />}
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -1795,7 +1894,7 @@ const FinalCTA = () => {
   const words = ["Your", "Next", "Cohort", "Deserves"];
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-6 py-32 md:py-40">
+    <section ref={ref} className="relative overflow-hidden px-4 sm:px-6 py-20 sm:py-28 md:py-32 lg:py-40">
       {/* Multi-layer animated background */}
       <motion.div
         className="absolute inset-0"
@@ -1804,7 +1903,7 @@ const FinalCTA = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, hsl(38 90% 55% / 0.12), hsl(24 85% 48% / 0.06), hsl(216 90% 58% / 0.04))",
+            background: "linear-gradient(135deg, hsl(216 90% 58% / 0.12), hsl(216 90% 58% / 0.06), hsl(216 90% 58% / 0.04))",
           }}
         />
       </motion.div>
@@ -1812,7 +1911,7 @@ const FinalCTA = () => {
       {/* Animated gradient orbs */}
       <motion.div
         className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full"
-        style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.12), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.12), transparent 60%)" }}
         animate={{ x: [0, 50, -30, 0], y: [0, -40, 30, 0], scale: [1, 1.1, 0.95, 1] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -1824,7 +1923,7 @@ const FinalCTA = () => {
       />
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
-        style={{ background: "radial-gradient(circle, hsl(43 65% 50% / 0.06), transparent 50%)" }}
+        style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.06), transparent 50%)" }}
         animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -1838,7 +1937,7 @@ const FinalCTA = () => {
       {/* Radial glow */}
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.1), transparent 50%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.1), transparent 50%)" }}
       />
 
       {/* Content */}
@@ -1850,7 +1949,7 @@ const FinalCTA = () => {
         variants={stagger}
       >
         {/* Animated headline word by word */}
-        <h2 className="text-4xl font-extrabold sm:text-5xl md:text-6xl leading-tight">
+        <h2 className="text-3xl font-extrabold sm:text-4xl md:text-5xl lg:text-6xl leading-tight">
           {words.map((word, i) => (
             <motion.span
               key={i}
@@ -1880,7 +1979,7 @@ const FinalCTA = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="mt-8 text-xl text-muted-foreground max-w-xl mx-auto"
+          className="mt-6 sm:mt-8 text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto"
         >
           <span className="text-foreground font-medium">15 minutes. One call.</span> That's all it takes to see if we're the right fit. No pitch deck. No pressure. Just a real conversation about your program.
         </motion.p>
@@ -1891,7 +1990,7 @@ const FinalCTA = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.9 }}
-          className="mt-12 flex justify-center"
+          className="mt-8 sm:mt-12 flex justify-center"
         >
           <div className="relative">
             {/* Triple pulse rings */}
@@ -1913,7 +2012,7 @@ const FinalCTA = () => {
             <Button
               asChild
               size="lg"
-              className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-14 py-7 text-lg font-bold shadow-[0_0_50px_hsl(38,90%,55%/0.5)] hover:shadow-[0_0_80px_hsl(38,90%,55%/0.7)] transition-all duration-500"
+              className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-5 text-base sm:px-14 sm:py-7 sm:text-lg font-bold shadow-[0_0_50px_hsl(216,90%,58%/0.5)] hover:shadow-[0_0_80px_hsl(216,90%,58%/0.7)] transition-all duration-500"
             >
               <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Let's Make Tech Disappear
@@ -1928,12 +2027,13 @@ const FinalCTA = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 1.05 }}
-          className="mt-8 flex items-center justify-center gap-2"
+          className="mt-6 sm:mt-8 flex items-center justify-center gap-2"
         >
-          <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-200">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            We only onboard <strong className="text-amber-100 mx-1">4 new clients per month.</strong>
-            <span className="text-amber-300/70">You've found us, don't lose your spot.</span>
+          <span className="inline-flex items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-200 text-center leading-snug">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span className="hidden sm:inline">We only onboard<strong className="text-blue-100 mx-1">4 new clients per month,</strong>to ensure focus, precision, and results.
+            <span className="text-blue-300/70">You've found us, don't lose your spot.</span></span>
+            <span className="sm:hidden">Only <strong className="text-blue-100">4 new clients/month</strong>. Don't lose your spot.</span>
           </span>
         </motion.div>
 
@@ -1949,7 +2049,7 @@ const FinalCTA = () => {
       </motion.div>
 
       {/* Bottom decorative line */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent glow-line-gold" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent glow-line" />
     </section>
   );
 };
@@ -1961,7 +2061,7 @@ const Footer = () => (
       <div className="flex items-center gap-2">
         <div className="h-8 w-8">
           <svg preserveAspectRatio="none" viewBox="90.391 393 3142.609 2721.9" height="32" width="32" xmlns="http://www.w3.org/2000/svg" aria-label="Virtual Producers Logo">
-            <g>
+            <g fill="white">
               <path d="M90.4 394.5c.3.8 228.5 394.2 507.2 874.2 278.7 480.1 633.1 1090.6 787.7 1356.8 154.5 266.2 281.7 485.2 282.6 486.7l1.6 2.7 84.5-147.1c46.5-80.9 84.4-147.6 84.2-148.2s-301-524.9-668.5-1165.1-670.4-1168.1-673.1-1173c-2.7-5-15.3-26.9-27.9-48.8L445.8 393h-178c-157.7 0-177.9.2-177.4 1.5"></path>
               <path d="M765 393.5c0 .6 443.4 773.4 486.8 848.5 29.7 51.5 751.3 1288.4 752.1 1289.2.3.4 39-66.1 85.9-147.7l85.2-148.4-325.7-567.3c-179.1-312-325.7-568.2-325.7-569.3s-51.8-90.9-115.2-199.5l-115.2-197.5 385.1-.3c211.8-.1 385.2 0 385.5.2.2.3-50.5 87.3-112.6 193.3-62.2 106.1-113.4 193.6-113.7 194.5-.4 1 31.4 57.3 87.6 155.2 75.9 132.3 88.4 153.4 89.4 151.9.7-1 131.4-223.9 290.5-495.3s291.2-496.8 293.6-500.8l4.4-7.2h-919c-505.5 0-919 .2-919 .5"></path>
               <path d="M2533 1024.7c-203.7 347.4-370.3 632.1-370.3 632.7 0 1.5 171 299.1 171.8 299.1.6 0 898.5-1562.1 898.5-1563.1 0-.2-74.2-.4-164.9-.4h-164.8z"></path>
@@ -1979,6 +2079,7 @@ const Footer = () => (
 const Index = () => (
   <div className="min-h-screen bg-background text-foreground noise-overlay">
     <CalendlyPopup />
+    <CalendlyFallbackPopup />
     <FloatingBlobs />
     <StickyBar />
     <main className="relative z-[2] pt-16">

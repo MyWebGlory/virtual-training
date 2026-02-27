@@ -4,10 +4,10 @@ import {
   CheckCircle2, Star, Phone, Mail, Linkedin, Clock,
   Lock, ArrowRight, ArrowLeft, Users, Monitor, BarChart3,
   Wrench, ClipboardCheck, UserCheck, Zap, Shield, Target,
-  Headphones, Calendar, type LucideIcon
+  Headphones, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import logoNike from "@/assets/logos/nike.png";
 import logoHp from "@/assets/logos/hp.png";
@@ -22,16 +22,16 @@ import logoSecureworks from "@/assets/logos/secureworks.png";
 import tTony from "@/assets/testimonials/tony-susa.png";
 
 const clientLogos = [
-  { src: logoNike, alt: "Nike" },
+  { src: logoNike, alt: "Nike", brighten: true },
   { src: logoSamsung, alt: "Samsung" },
   { src: logoHp, alt: "HP" },
   { src: logoOracle, alt: "Oracle" },
-  { src: logoAdidas, alt: "Adidas" },
+  { src: logoAdidas, alt: "Adidas", brighten: true },
   { src: logoNokia, alt: "Nokia" },
   { src: logoChevrolet, alt: "Chevrolet" },
-  { src: logoAngryOrchard, alt: "Angry Orchard" },
+  { src: logoAngryOrchard, alt: "Angry Orchard", brighten: true },
   { src: logoAtlantaUnited, alt: "Atlanta United" },
-  { src: logoSecureworks, alt: "Secureworks" },
+  { src: logoSecureworks, alt: "Secureworks", brighten: true },
 ];
 
 const fadeUp = {
@@ -54,7 +54,7 @@ const FloatingBlobs = () => (
     />
     <motion.div
       className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full opacity-15"
-      style={{ background: "radial-gradient(circle, hsl(38 90% 55% / 0.15), transparent 70%)" }}
+      style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.15), transparent 70%)" }}
       animate={{ x: [0, -25, 15, 0], y: [0, 20, -30, 0], scale: [1, 0.97, 1.04, 1] }}
       transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 3 }}
     />
@@ -225,13 +225,15 @@ const Header = () => (
 );
 
 // ─── Parse Calendly URL params ───
+// Params were captured in main.tsx before React mounted and saved to sessionStorage.
 function useCalendlyParams() {
-  const [searchParams] = useSearchParams();
+  let stored: Record<string, string> = {};
+  try {
+    const raw = sessionStorage.getItem("calendly_params");
+    if (raw) stored = JSON.parse(raw);
+  } catch {}
 
-  const get = (key: string) => {
-    const val = searchParams.get(key);
-    return val && val.trim() !== "" ? val.trim() : null;
-  };
+  const get = (key: string): string | null => stored[key] ?? null;
 
   const firstName = get("invitee_first_name");
   const lastName = get("invitee_last_name");
@@ -239,11 +241,9 @@ function useCalendlyParams() {
   const displayName = fullName;
 
   const startTimeRaw = get("event_start_time");
-  const endTimeRaw = get("event_end_time");
 
   let formattedDate: string | null = null;
   let formattedTime: string | null = null;
-  let formattedEndTime: string | null = null;
 
   if (startTimeRaw) {
     try {
@@ -255,26 +255,15 @@ function useCalendlyParams() {
     } catch {}
   }
 
-  if (endTimeRaw) {
-    try {
-      const d = new Date(endTimeRaw);
-      if (!isNaN(d.getTime())) {
-        formattedEndTime = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
-      }
-    } catch {}
-  }
-
   const assignedTo = get("assigned_to");
   const hostFirstName = assignedTo ? assignedTo.split(" ")[0] : null;
-  const platform = get("answer_6");
-  const participantCount = get("answer_5");
 
-  return { displayName, formattedDate, formattedTime, formattedEndTime, assignedTo, hostFirstName, platform, participantCount };
+  return { displayName, formattedDate, formattedTime, assignedTo, hostFirstName };
 }
 
 // ─── Hero Section ───
 const ThankYouHero = () => {
-  const { displayName, formattedDate, formattedTime, formattedEndTime, assignedTo, hostFirstName, platform, participantCount } = useCalendlyParams();
+  const { displayName, formattedDate, formattedTime, assignedTo, hostFirstName } = useCalendlyParams();
 
   const greeting = displayName ? `See you soon, ${displayName.split(" ")[0]}.` : "You're all set.";
   const headline = displayName
@@ -282,7 +271,7 @@ const ThankYouHero = () => {
     : <>You just made the best move for your{" "}<span className="shimmer-text">virtual training program.</span></>;
 
   return (
-  <section className="relative px-6 pt-28 pb-20 overflow-hidden">
+  <section className="relative px-4 sm:px-6 pt-24 sm:pt-28 pb-14 sm:pb-20 overflow-hidden">
     {/* Background effects */}
     <div
       className="absolute inset-0"
@@ -316,7 +305,7 @@ const ThankYouHero = () => {
         initial={{ opacity: 0, y: 25, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-8 inline-flex items-center gap-2 rounded-full border border-emerald-500/60 bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-300"
+        className="mb-5 sm:mb-8 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-500/60 bg-emerald-500/20 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-300"
       >
         <motion.span
           className="h-2 w-2 rounded-full bg-emerald-400 shadow shadow-emerald-300"
@@ -331,11 +320,11 @@ const ThankYouHero = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-col sm:flex-row items-start gap-6 mb-8"
+        className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8"
       >
         {/* Profile card */}
-        <div className="relative shrink-0 w-36 sm:w-40 self-stretch">
-          <div className="relative h-full min-h-[160px] rounded-xl overflow-hidden border-2 border-primary/30 shadow-[0_0_30px_hsl(38,90%,55%/0.15)] group">
+        <div className="relative shrink-0 w-28 sm:w-36 md:w-40 self-stretch">
+          <div className="relative h-full min-h-[130px] sm:min-h-[160px] rounded-xl overflow-hidden border-2 border-primary/30 shadow-[0_0_30px_hsl(216,90%,58%/0.15)] group">
             <img
               src={austinPhoto}
               alt="Austin Talley, Founder & CEO"
@@ -347,7 +336,7 @@ const ThankYouHero = () => {
               <p className="text-[11px] text-white/70 leading-tight">Founder & CEO</p>
               <div className="flex items-center gap-1 mt-1">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="h-3 w-3 fill-blue-400 text-blue-400" />
                 ))}
                 <span className="text-[10px] text-white/60 ml-1">4.9/5</span>
               </div>
@@ -356,11 +345,11 @@ const ThankYouHero = () => {
         </div>
 
         {/* Big headline */}
-        <div className="flex-1 flex flex-col justify-center min-h-[160px] gap-2">
+        <div className="flex-1 flex flex-col justify-center min-h-[100px] sm:min-h-[160px] gap-2">
           {displayName && (
-            <p className="text-emerald-400 font-semibold text-lg tracking-tight">{greeting}</p>
+            <p className="text-emerald-400 font-semibold text-base sm:text-lg tracking-tight">{greeting}</p>
           )}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-[1.1] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight">
             {headline}
           </h1>
         </div>
@@ -371,83 +360,21 @@ const ThankYouHero = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="text-lg text-muted-foreground leading-relaxed max-w-3xl mb-6"
+        className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl mb-4 sm:mb-6"
       >
         Your strategy call is locked in. While most L&D teams are still trying to figure out virtual production on their own,{" "}
         <span className="text-foreground font-semibold">you just took the step</span> that separates programs that survive from programs that{" "}
-        <span className="text-primary font-semibold keyword-glow">dominate.</span>
+        <span className="text-primary font-semibold keyword-glow">inspire.</span>
       </motion.p>
 
-      {/* Meeting details card */}
-      {(formattedDate || formattedTime || platform || participantCount) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-w-2xl"
-        >
-          {formattedDate && (
-            <div className="flex items-start gap-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Calendar className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400/70 mb-0.5">Date</p>
-                <p className="text-sm font-semibold text-foreground">{formattedDate}</p>
-                {formattedTime && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {formattedTime}{formattedEndTime ? ` → ${formattedEndTime}` : ""}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
 
-          {assignedTo && (
-            <div className="flex items-start gap-3 bg-primary/5 border border-primary/15 rounded-xl p-4">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <UserCheck className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-primary/70 mb-0.5">You're meeting with</p>
-                <p className="text-sm font-semibold text-foreground capitalize">{assignedTo.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Founder & CEO</p>
-              </div>
-            </div>
-          )}
-
-          {platform && (
-            <div className="flex items-start gap-3 bg-blue-500/5 border border-blue-500/15 rounded-xl p-4">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Monitor className="w-4 h-4 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-400/70 mb-0.5">Platform</p>
-                <p className="text-sm font-semibold text-foreground">{platform}</p>
-              </div>
-            </div>
-          )}
-
-          {participantCount && (
-            <div className="flex items-start gap-3 bg-amber-500/5 border border-amber-500/15 rounded-xl p-4">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Users className="w-4 h-4 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-400/70 mb-0.5">Cohort Size</p>
-                <p className="text-sm font-semibold text-foreground">{participantCount} participants</p>
-              </div>
-            </div>
-          )}
-        </motion.div>
-      )}
 
       {/* Confirmation notice */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-start gap-3 bg-primary/5 border border-primary/15 rounded-xl p-4 mb-6 max-w-2xl"
+        className="flex items-start gap-3 bg-primary/5 border border-primary/15 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 max-w-2xl"
       >
         <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
           <Clock className="w-4 h-4 text-primary" />
@@ -455,7 +382,9 @@ const ThankYouHero = () => {
         <div>
           <p className="text-sm font-semibold mb-0.5 flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            {formattedDate ? `See you on ${formattedDate}` : "We confirm within 24 hours"}
+            {formattedDate
+                ? `See you on ${formattedDate}${formattedTime ? ` at ${formattedTime}` : ""}`
+                : "We confirm within 24 hours"}
           </p>
           <p className="text-xs text-muted-foreground">
             {hostFirstName ?? "Austin"} will personally review your event and prepare a custom strategy outline before you speak. Come ready, this call will be sharp and actionable from minute one.
@@ -468,13 +397,13 @@ const ThankYouHero = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.75 }}
-        className="flex items-center gap-2 text-sm text-muted-foreground mb-10"
+        className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-8 sm:mb-10"
       >
         <span className="inline-flex items-center justify-center flex-shrink-0">
-          <Lock className="w-5 h-5 text-amber-400" />
+          <Lock className="w-5 h-5 text-blue-400" />
         </span>
         <span>
-          We only onboard <strong className="text-foreground">4 new clients per month</strong>, you've earned your place in line.
+          We only onboard <strong className="text-foreground">4 new clients per month</strong>, to ensure focus, precision, and results. You've earned your place in line.
         </span>
       </motion.div>
 
@@ -488,7 +417,7 @@ const ThankYouHero = () => {
           asChild
           size="lg"
           variant="outline"
-          className="group border-primary/40 hover:border-primary hover:bg-primary/10 px-8 py-6 text-base font-bold transition-all duration-300 hover:shadow-[0_0_30px_hsl(38,90%,55%/0.2)]"
+          className="group border-primary/40 hover:border-primary hover:bg-primary/10 px-8 py-6 text-base font-bold transition-all duration-300 hover:shadow-[0_0_30px_hsl(216,90%,58%/0.2)]"
         >
           <Link to="/">
             <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1" />
@@ -503,30 +432,31 @@ const ThankYouHero = () => {
 
 // ─── Logo Marquee ───
 const LogoMarquee = () => (
-  <section className="overflow-hidden border-y border-border/20 py-12 relative">
+  <section className="overflow-hidden border-y border-border/20 py-8 sm:py-12 relative">
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.04), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.04), transparent 60%)" }}
     />
     <motion.p
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="mb-10 text-center text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground relative z-10"
+      className="mb-6 sm:mb-10 text-center text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-muted-foreground relative z-10"
     >
-      You're joining the ranks of industry leaders
+      You're joining the ranks of industry leaders that trust us
     </motion.p>
     <div className="relative">
       <div className="flex animate-marquee" style={{ width: "max-content" }}>
         {[0, 1].map((setIdx) => (
-          <div key={setIdx} className="flex items-center gap-20 pr-20 flex-shrink-0">
+          <div key={setIdx} className="flex items-center gap-10 pr-10 sm:gap-16 sm:pr-16 md:gap-20 md:pr-20 flex-shrink-0">
             {clientLogos.map((logo, i) => (
               <motion.img
                 key={i}
                 src={logo.src}
                 alt={logo.alt}
-                className="h-12 w-auto flex-shrink-0 transition-all duration-500 hover:scale-110"
-                whileHover={{ filter: "brightness(1.3)" }}
+                className="h-8 sm:h-10 md:h-12 w-auto flex-shrink-0 transition-all duration-500 hover:scale-110"
+                style={logo.brighten ? { filter: "brightness(0) invert(1) opacity(0.75)" } : undefined}
+                whileHover={{ filter: logo.brighten ? "brightness(0) invert(1) opacity(1)" : "brightness(1.3)" }}
               />
             ))}
           </div>
@@ -538,10 +468,10 @@ const LogoMarquee = () => (
 
 // ─── Stats Section ───
 const StatsSection = () => (
-  <section className="px-6 py-20 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-14 sm:py-20 relative overflow-hidden">
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.06), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.06), transparent 60%)" }}
     />
     <motion.div
       className="mx-auto max-w-4xl relative z-10"
@@ -553,11 +483,11 @@ const StatsSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Why you made the right call
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl mb-12">
+      <motion.h2 variants={fadeUp} className="text-center text-2xl font-extrabold sm:text-3xl md:text-4xl mb-8 sm:mb-12">
         Here's What You're <span className="shimmer-text">Plugging Into</span>
       </motion.h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {[
           { num: "2,000+", label: "Events Produced" },
           { num: "100%", label: "Success Rate" },
@@ -571,12 +501,12 @@ const StatsSection = () => (
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ scale: 1.05, y: -4 }}
-            className="glass rounded-xl p-5 text-center group cursor-default hover:border-primary/25 transition-colors duration-300"
+            className="glass rounded-xl p-3 sm:p-5 text-center group cursor-default hover:border-primary/25 transition-colors duration-300"
           >
             <AnimatedCounter
               target={stat.num}
               delay={200}
-              className="text-2xl sm:text-3xl font-extrabold gradient-text-accent"
+              className="text-xl sm:text-2xl md:text-3xl font-extrabold gradient-text-accent"
             />
             <div className="mt-2 text-xs text-muted-foreground tracking-wide uppercase">{stat.label}</div>
           </motion.div>
@@ -615,11 +545,11 @@ const processSteps = [
 ];
 
 const WhatHappensNow = () => (
-  <section className="px-6 py-24 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-24 relative overflow-hidden">
     <FloatingIcons icons={[ClipboardCheck, Phone, Wrench, Users, Monitor, Target]} count={8} />
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(38 90% 55% / 0.06), transparent 50%)" }}
+      style={{ background: "radial-gradient(ellipse at 30% 50%, hsl(216 90% 58% / 0.06), transparent 50%)" }}
     />
     <motion.div
       className="mx-auto max-w-4xl relative z-10"
@@ -631,10 +561,10 @@ const WhatHappensNow = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         Your roadmap
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl md:text-5xl mb-4">
+      <motion.h2 variants={fadeUp} className="text-center text-2xl font-extrabold sm:text-3xl md:text-4xl lg:text-5xl mb-4">
         What Happens <span className="shimmer-text">Now</span>
       </motion.h2>
-      <motion.p variants={fadeUp} className="text-center text-lg text-muted-foreground max-w-2xl mx-auto mb-14">
+      <motion.p variants={fadeUp} className="text-center text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 sm:mb-14">
         You've taken the first step. Here's exactly how we turn your strategy call into a{" "}
         <span className="text-foreground font-medium">seamless production partnership.</span>
       </motion.p>
@@ -657,7 +587,7 @@ const WhatHappensNow = () => (
                 className={`relative flex flex-col md:flex-row items-center gap-6 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"}`}
               >
                 {/* Card */}
-                <div className={`flex-1 glass rounded-2xl p-6 sm:p-8 relative group hover:border-primary/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_hsl(38,90%,55%/0.12)] ${isLeft ? "md:text-right" : "md:text-left"}`}>
+                <div className={`flex-1 glass rounded-2xl p-5 sm:p-6 md:p-8 relative group hover:border-primary/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_hsl(216,90%,58%/0.12)] ${isLeft ? "md:text-right" : "md:text-left"}`}>
                   <span className="absolute top-4 right-6 text-6xl font-extrabold text-primary/[0.06] select-none">{step.num}</span>
                   <div className={`flex items-center gap-3 mb-3 ${isLeft ? "md:justify-end" : ""}`}>
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
@@ -679,7 +609,7 @@ const WhatHappensNow = () => (
                 </div>
 
                 {/* Center dot (desktop) */}
-                <div className="hidden md:flex shrink-0 h-5 w-5 rounded-full bg-primary border-4 border-background shadow-[0_0_15px_hsl(43,65%,50%/0.4)] z-10" />
+                <div className="hidden md:flex shrink-0 h-5 w-5 rounded-full bg-primary border-4 border-background shadow-[0_0_15px_hsl(216,90%,58%/0.4)] z-10" />
 
                 {/* Spacer for the other side */}
                 <div className="hidden md:block flex-1" />
@@ -694,10 +624,10 @@ const WhatHappensNow = () => (
 
 // ─── Testimonial ───
 const TestimonialSection = () => (
-  <section className="px-6 py-20 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-14 sm:py-20 relative overflow-hidden">
     <div
       className="absolute inset-0 opacity-20"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.06), transparent 60%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.06), transparent 60%)" }}
     />
     <FloatingIcons icons={[Star, CheckCircle2, Users, Shield]} count={6} />
     <motion.div
@@ -710,7 +640,7 @@ const TestimonialSection = () => (
       <motion.p variants={fadeUp} className="text-center text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         From someone like you
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-center text-3xl font-extrabold sm:text-4xl mb-10">
+      <motion.h2 variants={fadeUp} className="text-center text-2xl font-extrabold sm:text-3xl md:text-4xl mb-8 sm:mb-10">
         You're in <span className="shimmer-text">Great Company</span>
       </motion.h2>
 
@@ -719,14 +649,14 @@ const TestimonialSection = () => (
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="glass rounded-2xl p-8 hover:border-primary/25 transition-all duration-500 hover:shadow-[0_0_30px_hsl(38,90%,55%/0.1)]"
+        className="glass rounded-2xl p-5 sm:p-8 hover:border-primary/25 transition-all duration-500 hover:shadow-[0_0_30px_hsl(216,90%,58%/0.1)]"
       >
         <div className="flex gap-1 mb-4">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="h-5 w-5 fill-primary text-primary" />
           ))}
         </div>
-        <p className="text-foreground/85 leading-relaxed italic text-lg mb-6">
+        <p className="text-foreground/85 leading-relaxed italic text-base sm:text-lg mb-4 sm:mb-6">
           "It is such a huge help as a facilitator to not have to worry about the technology, the breakouts and managing polls, and Austin and his team have done it seamlessly every time. I've worked with Austin and Olivia and both have been extremely flexible, responsive and an absolute pleasure to work with. If you are hosting a large event or a small workshop Virtual Producers are well worth the investment."
         </p>
         <div className="flex items-center gap-4">
@@ -747,11 +677,11 @@ const TestimonialSection = () => (
 
 // ─── Contact Section ───
 const ContactSection = () => (
-  <section className="px-6 py-24 relative overflow-hidden">
+  <section className="px-4 sm:px-6 py-16 sm:py-24 relative overflow-hidden">
     <FloatingIcons icons={[Phone, Mail, Linkedin, Star]} count={6} />
     <div
       className="absolute inset-0"
-      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(38 90% 55% / 0.08), transparent 50%)" }}
+      style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.08), transparent 50%)" }}
     />
 
     <motion.div
@@ -764,10 +694,10 @@ const ContactSection = () => (
       <motion.p variants={fadeUp} className="text-sm font-bold uppercase tracking-[0.25em] text-primary mb-4">
         We're here for you
       </motion.p>
-      <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl md:text-5xl mb-4">
+      <motion.h2 variants={fadeUp} className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-4">
         Any Questions <span className="shimmer-text">Before the Call?</span>
       </motion.h2>
-      <motion.p variants={fadeUp} className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
+      <motion.p variants={fadeUp} className="text-base sm:text-lg text-muted-foreground mb-8 sm:mb-10 max-w-xl mx-auto">
         Don't wait for the call if something's on your mind. Reach out directly, Austin responds personally.
       </motion.p>
 
@@ -777,7 +707,7 @@ const ContactSection = () => (
       >
         <a
           href="tel:4043371539"
-          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(38,90%,55%/0.15)] transition-all duration-300 group"
+          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(216,90%,58%/0.15)] transition-all duration-300 group"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
             <Phone className="h-5 w-5 text-primary" />
@@ -790,7 +720,7 @@ const ContactSection = () => (
 
         <a
           href="mailto:austin@vproducers.com"
-          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(38,90%,55%/0.15)] transition-all duration-300 group"
+          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(216,90%,58%/0.15)] transition-all duration-300 group"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
             <Mail className="h-5 w-5 text-primary" />
@@ -805,7 +735,7 @@ const ContactSection = () => (
           href="https://www.linkedin.com/in/talley-austin"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(38,90%,55%/0.15)] transition-all duration-300 group"
+          className="flex items-center gap-3 glass rounded-xl px-6 py-4 w-full sm:w-auto hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(216,90%,58%/0.15)] transition-all duration-300 group"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
             <Linkedin className="h-5 w-5 text-primary" />
