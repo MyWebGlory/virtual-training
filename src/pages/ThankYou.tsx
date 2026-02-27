@@ -336,7 +336,7 @@ const ThankYouHero = () => {
               <p className="text-[11px] text-white/70 leading-tight">Founder & CEO</p>
               <div className="flex items-center gap-1 mt-1">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-blue-400 text-blue-400" />
+                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 ))}
                 <span className="text-[10px] text-white/60 ml-1">4.9/5</span>
               </div>
@@ -400,7 +400,7 @@ const ThankYouHero = () => {
         className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-8 sm:mb-10"
       >
         <span className="inline-flex items-center justify-center flex-shrink-0">
-          <Lock className="w-5 h-5 text-blue-400" />
+          <Lock className="w-5 h-5 text-amber-400" />
         </span>
         <span>
           We only onboard <strong className="text-foreground">4 new clients per month</strong>, to ensure focus, precision, and results. You've earned your place in line.
@@ -764,13 +764,13 @@ const Footer = () => (
     <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 text-sm text-muted-foreground sm:flex-row sm:justify-between">
       <div className="flex items-center gap-2">
         <div className="h-8 w-8">
-          <svg preserveAspectRatio="none" viewBox="90.391 393 3142.609 2721.9" height="32" width="32" xmlns="http://www.w3.org/2000/svg" aria-label="Virtual Producers Logo">
-            <g>
+            <svg preserveAspectRatio="none" viewBox="90.391 393 3142.609 2721.9" height="32" width="32" xmlns="http://www.w3.org/2000/svg" aria-label="Virtual Producers Logo">
+            <g fill="white">
               <path d="M90.4 394.5c.3.8 228.5 394.2 507.2 874.2 278.7 480.1 633.1 1090.6 787.7 1356.8 154.5 266.2 281.7 485.2 282.6 486.7l1.6 2.7 84.5-147.1c46.5-80.9 84.4-147.6 84.2-148.2s-301-524.9-668.5-1165.1-670.4-1168.1-673.1-1173c-2.7-5-15.3-26.9-27.9-48.8L445.8 393h-178c-157.7 0-177.9.2-177.4 1.5" />
               <path d="M765 393.5c0 .6 443.4 773.4 486.8 848.5 29.7 51.5 751.3 1288.4 752.1 1289.2.3.4 39-66.1 85.9-147.7l85.2-148.4-325.7-567.3c-179.1-312-325.7-568.2-325.7-569.3s-51.8-90.9-115.2-199.5l-115.2-197.5 385.1-.3c211.8-.1 385.2 0 385.5.2.2.3-50.5 87.3-112.6 193.3-62.2 106.1-113.4 193.6-113.7 194.5-.4 1 31.4 57.3 87.6 155.2 75.9 132.3 88.4 153.4 89.4 151.9.7-1 131.4-223.9 290.5-495.3s291.2-496.8 293.6-500.8l4.4-7.2h-919c-505.5 0-919 .2-919 .5" />
               <path d="M2533 1024.7c-203.7 347.4-370.3 632.1-370.3 632.7 0 1.5 171 299.1 171.8 299.1.6 0 898.5-1562.1 898.5-1563.1 0-.2-74.2-.4-164.9-.4h-164.8z" />
             </g>
-          </svg>
+            </svg>
         </div>
         <span className="font-bold text-lg tracking-tight">VIRTUAL PRODUCERS</span>
       </div>

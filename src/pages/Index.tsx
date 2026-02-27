@@ -578,7 +578,7 @@ const SocialProofAvatars = () => (
     <div className="flex flex-col items-start gap-0.5">
       <div className="flex items-center gap-0.5">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} className="h-3.5 w-3.5 fill-blue-400 text-blue-400" />
+          <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
         ))}
       </div>
       <span className="text-xs text-muted-foreground leading-none">
@@ -695,49 +695,56 @@ const Hero = () => {
         </motion.div>
         {/* Headline: word-by-word cinematic reveal */}
         <h1 className="text-[2rem] font-extrabold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-          {line1.map((word, i) => (
-            <motion.span
-              key={`l1-${i}`}
-              className="inline-block mr-[0.22em]"
-              initial={{ opacity: 0, y: 50, rotateX: 45, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 0.3 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {word}
-            </motion.span>
-          ))}
-          <br />
-          <motion.span
-            className="inline-block shimmer-text relative z-10 pb-3"
-            initial={{ opacity: 0, y: 50, scale: 0.85 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1.1, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Drowning.
-          </motion.span>{" "}
-          {line2.map((word, i) => (
-            <motion.span
-              key={`l2-${i}`}
-              className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
-              initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 0.85 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {word}
-            </motion.span>
-          ))}
-          <br />
-          {line3.map((word, i) => (
-            <motion.span
-              key={`l3-${i}`}
-              className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
-              initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 1.05 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {word}
-            </motion.span>
-          ))}
+          {/* First line: YourFacilitatorIs Drowning. */}
+          <span>
+            <span>
+              {line1.map((word, i) => (
+                <motion.span
+                  key={`l1-${i}`}
+                  className="inline-block mr-[0.22em]"
+                  initial={{ opacity: 0, y: 50, rotateX: 45, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.9, delay: 0.3 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+              <motion.span
+                className="inline-block shimmer-text relative z-10 pb-3 ml-2"
+                initial={{ opacity: 0, y: 50, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 1.1, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              >
+                Drowning.
+              </motion.span>
+            </span>
+            <br />
+            {/* Second line: YouJust Don'tSeeItYet. */}
+            <span>
+              {line2.map((word, i) => (
+                <motion.span
+                  key={`l2-${i}`}
+                  className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
+                  initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.9, delay: 0.85 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+              {line3.map((word, i) => (
+                <motion.span
+                  key={`l3-${i}`}
+                  className="inline-block text-muted-foreground/60 mr-[0.22em] bg-gradient-to-b from-background/0 via-background/0 to-background/0"
+                  initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.9, delay: 1.05 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </span>
+          </span>
         </h1>
 
         {/* Subtext with keyword glow */}
@@ -798,7 +805,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.0 }}
           >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-semibold text-blue-300 text-center leading-tight">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 text-center leading-tight">
               <motion.span
                 className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0"
                 animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
@@ -1211,7 +1218,7 @@ const BoldQualifierSection = () => {
           transition={{ delay: 0.2 }}
           className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground mt-5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           <span>We only onboard <strong className="text-foreground">4 new clients per month</strong>, to ensure focus, precision, and results. If you're a fit, don't wait.</span>
         </motion.div>
       </motion.div>
@@ -1294,7 +1301,7 @@ const ShiftSection = () => {
             </motion.p>
             <motion.div
               variants={fadeUp}
-              className="mt-8 h-1 w-24 rounded-full bg-gradient-to-r from-primary to-line-accent glow-line"
+              className="mt-8 h-1 w-24 rounded-full bg-gradient-to-r from-primary to-line-accent glow-line-gold"
             />
           </div>
           <motion.div
@@ -1694,7 +1701,7 @@ const TestimonialCard = ({ t, index }: { t: typeof testimonials[0]; index: numbe
   >
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
-        <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
       ))}
     </div>
     <p className="text-sm text-foreground/80 leading-relaxed italic">"{t.quote}"</p>
@@ -2049,7 +2056,7 @@ const FinalCTA = () => {
       </motion.div>
 
       {/* Bottom decorative line */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent glow-line" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent glow-line-gold" />
     </section>
   );
 };

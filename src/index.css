@@ -118,7 +118,7 @@
   }
 
   .glow-line-gold {
-    box-shadow: 0 0 15px hsl(216, 90%, 58% / 0.4), 0 0 45px hsl(216, 90%, 58% / 0.15);
+    box-shadow: 0 0 15px hsl(43, 65%, 50% / 0.4), 0 0 45px hsl(43, 65%, 50% / 0.15);
   }
 
   .noise-overlay {
