@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform, useMotionValueEvent, useInView, useAni
 import { useRef, useState, useMemo, useEffect } from "react";
 import {
   Monitor, Users, BarChart3, Wrench, ClipboardCheck, UserCheck,
-  CheckCircle2, XCircle, Star, Phone, Mail, Linkedin, ChevronDown,
+  CheckCircle2, XCircle, X, Star, Phone, Mail, Linkedin, ChevronDown,
   Zap, Shield, Layers, ArrowRight, AlertTriangle, DollarSign,
   Target, Clock, Headphones, type LucideIcon
 } from "lucide-react";
@@ -52,6 +52,108 @@ const clientLogos = [
 ];
 
 const CALENDLY = "https://calendly.com/austin-vmproducers/virtual-producer-introduction-call";
+
+// Module-level setter — wired up by CalendlyPopup on mount
+let _setCalendlyOpen: ((v: boolean) => void) | null = null;
+
+// Intercepts the click for GTM (href stays), opens preloaded popup instead
+function openCalendlyPopup(e: React.MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault();
+  if (_setCalendlyOpen) {
+    _setCalendlyOpen(true);
+  }
+}
+
+// ─── Calendly Preloaded Popup ───
+// Programmatically initialises the inline widget as soon as window.Calendly is
+// available (polls every 100 ms). The overlay stays invisible (opacity-0 /
+// pointer-events-none) until a button is clicked — the iframe is fully loaded
+// in the background so the popup appears instantly.
+function CalendlyPopup() {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialised = useRef(false);
+
+  // Wire up the module-level setter so openCalendlyPopup() can reach us
+  useEffect(() => {
+    _setCalendlyOpen = setOpen;
+    return () => { _setCalendlyOpen = null; };
+  }, []);
+
+  // Initialise the inline widget as soon as the Calendly script is ready
+  useEffect(() => {
+    if (initialised.current) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tryInit = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const Cal = (window as any).Calendly;
+      if (Cal && typeof Cal.initInlineWidget === "function" && containerRef.current) {
+        Cal.initInlineWidget({
+          url: CALENDLY,
+          parentElement: containerRef.current,
+        });
+        initialised.current = true;
+      }
+    };
+
+    tryInit(); // Attempt immediately in case script already loaded
+    const interval = setInterval(() => {
+      if (initialised.current) { clearInterval(interval); return; }
+      tryInit();
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Lock body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  const close = () => setOpen(false);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] transition-all duration-300"
+      style={{
+        opacity: open ? 1 : 0,
+        pointerEvents: open ? "auto" : "none",
+      }}
+      aria-modal={open}
+      role="dialog"
+      aria-label="Schedule a call"
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={close} />
+      {/* Panel */}
+      <div className="absolute inset-3 md:inset-6 lg:inset-10 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <button
+          onClick={close}
+          aria-label="Close"
+          className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
+        >
+          <X className="h-5 w-5 text-gray-700" />
+        </button>
+        {/* Calendly renders its iframe into this div */}
+        <div
+          ref={containerRef}
+          className="w-full flex-1"
+          style={{ minWidth: "320px", minHeight: "500px" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -343,7 +445,7 @@ const StickyBar = () => {
           size="sm"
           className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_20px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_40px_hsl(38,90%,55%/0.5)] transition-all duration-300"
         >
-          <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+          <a href={CALENDLY} onClick={openCalendlyPopup}>
             Get a Dedicated Producer
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </a>
@@ -581,7 +683,7 @@ const Hero = () => {
               size="lg"
               className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-7 text-lg font-bold shadow-[0_0_40px_hsl(38,90%,55%/0.5)] hover:shadow-[0_0_60px_hsl(38,90%,55%/0.7)] transition-all duration-500"
             >
-              <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+              <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Get a Dedicated Producer
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
               </a>
@@ -999,7 +1101,7 @@ const BoldQualifierSection = () => {
             size="lg"
             className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.5)] transition-shadow"
           >
-            <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+            <a href={CALENDLY} onClick={openCalendlyPopup}>
               Yes, That's Me, Let's Talk
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
             </a>
@@ -1604,7 +1706,7 @@ const FounderSection = () => (
               size="lg"
               className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-bold shadow-[0_0_30px_hsl(38,90%,55%/0.3)] hover:shadow-[0_0_50px_hsl(38,90%,55%/0.5)] transition-all duration-300"
             >
-              <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+              <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Book a Call with Austin
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </a>
@@ -1813,7 +1915,7 @@ const FinalCTA = () => {
               size="lg"
               className="relative group bg-primary hover:bg-primary/90 text-primary-foreground px-14 py-7 text-lg font-bold shadow-[0_0_50px_hsl(38,90%,55%/0.5)] hover:shadow-[0_0_80px_hsl(38,90%,55%/0.7)] transition-all duration-500"
             >
-              <a href={CALENDLY} target="_blank" rel="noopener noreferrer">
+              <a href={CALENDLY} onClick={openCalendlyPopup}>
                 Let's Make Tech Disappear
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
               </a>
@@ -1876,6 +1978,7 @@ const Footer = () => (
 // ─── Main Page ───
 const Index = () => (
   <div className="min-h-screen bg-background text-foreground noise-overlay">
+    <CalendlyPopup />
     <FloatingBlobs />
     <StickyBar />
     <main className="relative z-[2] pt-16">
