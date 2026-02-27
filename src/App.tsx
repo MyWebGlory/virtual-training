@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
+import { ColorThemeProvider } from "./hooks/useColorTheme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ColorThemeProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -23,6 +25,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </ColorThemeProvider>
   </QueryClientProvider>
 );
 

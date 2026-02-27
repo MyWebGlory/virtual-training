@@ -7,7 +7,7 @@ import {
   Headphones, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { ColorThemePicker } from "@/components/ColorThemePicker";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import logoNike from "@/assets/logos/nike.png";
 import logoHp from "@/assets/logos/hp.png";
@@ -209,17 +209,20 @@ const Header = () => (
           <span className="text-lg tracking-tight">PRODUCERS</span>
         </div>
       </Link>
-      <Button
-        asChild
-        size="sm"
-        variant="outline"
-        className="group border-primary/30 hover:border-primary/60 hover:bg-primary/10 transition-all duration-300"
-      >
-        <Link to="/">
-          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back to Home
-        </Link>
-      </Button>
+      <div className="flex items-center gap-3">
+        <ColorThemePicker />
+        <Button
+          asChild
+          size="sm"
+          variant="outline"
+          className="group border-primary/30 hover:border-primary/60 hover:bg-primary/10 transition-all duration-300"
+        >
+          <Link to="/">
+            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to Home
+          </Link>
+        </Button>
+      </div>
     </div>
   </header>
 );

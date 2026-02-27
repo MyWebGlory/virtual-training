@@ -7,6 +7,7 @@ import {
   Target, Clock, Headphones, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ColorThemePicker } from "@/components/ColorThemePicker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import vmLogo from "@/assets/vm-logo-white.png";
@@ -535,7 +536,9 @@ const StickyBar = () => {
               <span className=" text-lg tracking-tight">PRODUCERS</span>
             </div>
         </div>
-        <Button
+        <div className="flex items-center gap-3">
+          <ColorThemePicker />
+          <Button
           asChild
           size="sm"
           className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_20px_hsl(216,90%,58%/0.3)] hover:shadow-[0_0_40px_hsl(216,90%,58%/0.5)] transition-all duration-300 text-xs sm:text-sm px-3 sm:px-4"
@@ -546,6 +549,7 @@ const StickyBar = () => {
             <ArrowRight className="ml-1.5 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
           </a>
         </Button>
+        </div>
       </div>
     </motion.header>
   );
