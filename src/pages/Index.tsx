@@ -242,12 +242,15 @@ const FallbackButton = () => (
       This program is designed for structured corporate cohorts of 50+ participants.<br />
       If you're running smaller sessions, we offer a different support format.
     </p>
-    <button
+    <Button
+      variant="secondary"
+      size="sm"
       onClick={openFallbackCalendlyPopup}
-      className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 underline underline-offset-2 transition-colors cursor-pointer"
+      className="inline-flex items-center gap-1 text-muted-foreground/80 border border-muted-foreground/20 bg-muted/60 hover:bg-muted/80 hover:text-foreground font-semibold rounded-lg px-4 py-2 text-xs shadow-none transition-colors duration-200"
+      style={{ boxShadow: "0 0 0 0 transparent" }}
     >
-      Explore options for smaller programs →
-    </button>
+      Explore options for smaller programs <ArrowRight className="ml-1 h-3.5 w-3.5" />
+    </Button>
   </div>
 );
 
