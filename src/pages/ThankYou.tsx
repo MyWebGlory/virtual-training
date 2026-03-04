@@ -1,5 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useMemo, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 import {
   CheckCircle2, Star, Phone, Mail, Linkedin, Clock,
   Lock, ArrowRight, ArrowLeft, Users, Monitor, BarChart3,
@@ -780,9 +782,25 @@ const Footer = () => (
   </footer>
 );
 
+// ─── Structured Data ───
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.vmproducers.com" },
+    { "@type": "ListItem", position: 2, name: "Booking Confirmed", item: "https://www.vmproducers.com/thank-you" },
+  ],
+};
+
 // ─── Main Page ───
 const ThankYou = () => (
   <div className="min-h-screen bg-background text-foreground noise-overlay">
+    <SEO
+      title="You're Booked | Virtual Producers"
+      description="You just made the best move for your virtual training program. Here's what happens next with your Virtual Producers strategy call."
+      canonicalUrl="/thank-you"
+      structuredData={breadcrumbSchema}
+    />
     <FloatingBlobs />
     <Header />
     <main className="relative z-[2] pt-16">

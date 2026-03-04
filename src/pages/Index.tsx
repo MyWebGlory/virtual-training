@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform, useMotionValueEvent, useInView, useAnimationControls } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
+import SEO from "@/components/SEO";
 import {
   Monitor, Users, BarChart3, Wrench, ClipboardCheck, UserCheck,
   CheckCircle2, XCircle, X, Star, Phone, Mail, Linkedin, ChevronDown,
@@ -91,6 +92,8 @@ function CalendlyPopup() {
 
   // Initialise the inline widget as soon as the Calendly script is ready
   useEffect(() => {
+    // Skip Calendly init during react-snap prerendering
+    if (navigator.userAgent.includes("ReactSnap")) return;
     if (initialised.current) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,35 +135,50 @@ function CalendlyPopup() {
   }, [open]);
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] transition-all duration-300"
-      style={{
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? "auto" : "none",
-      }}
-      aria-modal={open}
-      role="dialog"
-      aria-label="Schedule a call"
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={close} />
-      {/* Panel */}
-      <div className="absolute inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col">
-        <button
-          onClick={close}
-          aria-label="Close"
-          className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
-        >
-          <X className="h-5 w-5 text-gray-700" />
-        </button>
-        {/* Calendly renders its iframe into this div */}
+    <>
+      {/* Backdrop — only interactive when open */}
+      <div
+        className="fixed inset-0 z-[9998] bg-black/75 backdrop-blur-sm transition-opacity duration-300"
+        style={{ opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none" }}
+        onClick={close}
+      />
+
+      {/* Calendly iframe container.
+          When closed: z-index:-1 puts it behind all page content so the iframe
+          can't capture touch events (iOS Safari bug), while keeping it fully
+          in-viewport with real dimensions so Calendly preloads the scheduling UI.
+          When open: brought to z-[9999] as a normal modal panel. */}
+      <div
+        className="fixed inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col transition-opacity duration-300"
+        style={open ? {
+          zIndex: 9999,
+          opacity: 1,
+          pointerEvents: "auto",
+        } : {
+          zIndex: -1,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+        role={open ? "dialog" : undefined}
+        aria-modal={open || undefined}
+        aria-label={open ? "Schedule a call" : undefined}
+      >
+        {open && (
+          <button
+            onClick={close}
+            aria-label="Close"
+            className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
+          >
+            <X className="h-5 w-5 text-gray-700" />
+          </button>
+        )}
         <div
           ref={containerRef}
           className="w-full flex-1"
           style={{ minWidth: "320px", minHeight: "500px" }}
         />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -176,6 +194,8 @@ function CalendlyFallbackPopup() {
   }, []);
 
   useEffect(() => {
+    // Skip Calendly init during react-snap prerendering
+    if (navigator.userAgent.includes("ReactSnap")) return;
     if (initialised.current) return;
     const tryInit = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -208,29 +228,44 @@ function CalendlyFallbackPopup() {
   }, [open]);
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] transition-all duration-300"
-      style={{ opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none" }}
-      aria-modal={open}
-      role="dialog"
-      aria-label="Schedule a call for smaller sessions"
-    >
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={close} />
-      <div className="absolute inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col">
-        <button
-          onClick={close}
-          aria-label="Close"
-          className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
-        >
-          <X className="h-5 w-5 text-gray-700" />
-        </button>
+    <>
+      <div
+        className="fixed inset-0 z-[9998] bg-black/75 backdrop-blur-sm transition-opacity duration-300"
+        style={{ opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none" }}
+        onClick={close}
+      />
+
+      <div
+        className="fixed inset-3 md:inset-6 lg:inset-10 overflow-hidden flex flex-col transition-opacity duration-300"
+        style={open ? {
+          zIndex: 9999,
+          opacity: 1,
+          pointerEvents: "auto",
+        } : {
+          zIndex: -1,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+        role={open ? "dialog" : undefined}
+        aria-modal={open || undefined}
+        aria-label={open ? "Schedule a call for smaller sessions" : undefined}
+      >
+        {open && (
+          <button
+            onClick={close}
+            aria-label="Close"
+            className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
+          >
+            <X className="h-5 w-5 text-gray-700" />
+          </button>
+        )}
         <div
           ref={containerRef}
           className="w-full flex-1"
           style={{ minWidth: "320px", minHeight: "500px" }}
         />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -2087,9 +2122,54 @@ const Footer = () => (
   </footer>
 );
 
+// ─── Structured Data ───
+const SITE_URL = "https://www.vmproducers.com";
+
+const homepageWebSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Virtual Producers",
+  url: SITE_URL,
+};
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Virtual Producers",
+  url: SITE_URL,
+  description:
+    "Expert virtual production for corporate cohort training programs of 50–150+ participants. Zoom, Teams, Webex.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "New York",
+    addressRegion: "NY",
+    addressCountry: "US",
+  },
+  priceRange: "$$$$",
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.a,
+    },
+  })),
+};
+
 // ─── Main Page ───
 const Index = () => (
   <div className="min-h-screen bg-background text-foreground noise-overlay">
+    <SEO
+      title="Virtual Producers – Expert Production for Corporate Cohort Training"
+      description="Stop risking your program's credibility. We handle every technical detail for corporate cohorts of 50+ participants, so your facilitators can focus on delivery."
+      canonicalUrl="/"
+      structuredData={[homepageWebSiteSchema, localBusinessSchema, faqSchema]}
+    />
     <CalendlyPopup />
     <CalendlyFallbackPopup />
     <FloatingBlobs />
