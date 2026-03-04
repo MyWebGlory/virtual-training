@@ -7,7 +7,6 @@ import {
   Headphones, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ColorThemePicker } from "@/components/ColorThemePicker";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import logoNike from "@/assets/logos/nike.png";
 import logoHp from "@/assets/logos/hp.png";
@@ -210,7 +209,6 @@ const Header = () => (
         </div>
       </Link>
       <div className="flex items-center gap-3">
-        <ColorThemePicker />
         <Button
           asChild
           size="sm"

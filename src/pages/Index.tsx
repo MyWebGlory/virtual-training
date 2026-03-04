@@ -7,7 +7,6 @@ import {
   Target, Clock, Headphones, type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ColorThemePicker } from "@/components/ColorThemePicker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import austinPhoto from "@/assets/austin-talley-founder.png";
 import vmLogo from "@/assets/vm-logo-white.png";
@@ -540,7 +539,6 @@ const StickyBar = () => {
             </div>
         </div>
         <div className="flex items-center gap-3">
-          <ColorThemePicker />
           <Button
           asChild
           size="sm"
@@ -612,7 +610,7 @@ const Hero = () => {
   return (
     <section ref={ref} className="relative flex min-h-screen items-center justify-center px-4 sm:px-6 overflow-hidden pt-16 pb-16 sm:pb-24 md:pb-32">
       {/* Parallax bg with zoom */}
-      <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale }}>
+      <motion.div className="absolute inset-0 pointer-events-none" style={{ y: bgY, scale: bgScale }}>
         <video
           src="/hero-video.mp4"
           autoPlay
@@ -628,23 +626,23 @@ const Hero = () => {
       </motion.div>
 
       {/* Multi-layer gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background pointer-events-none" />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% 20%, hsl(216 90% 58% / 0.18), transparent 50%)" }}
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 20% 80%, hsl(216 90% 58% / 0.08), transparent 40%)" }}
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 80% 60%, hsl(216 90% 58% / 0.06), transparent 40%)" }}
       />
 
       {/* Animated dot grid with parallax */}
       <motion.div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage: "radial-gradient(circle, hsl(0 0% 100%) 1px, transparent 1px)",
           backgroundSize: "40px 40px",
@@ -660,19 +658,19 @@ const Hero = () => {
 
       {/* Animated energy orbs */}
       <motion.div
-        className="absolute top-1/4 left-[15%] w-[500px] h-[500px] rounded-full"
+        className="absolute top-1/4 left-[15%] w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.12), transparent 60%)" }}
         animate={{ x: [0, 40, -30, 0], y: [0, -30, 40, 0], scale: [1, 1.1, 0.95, 1] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-1/3 right-[10%] w-[400px] h-[400px] rounded-full"
+        className="absolute bottom-1/3 right-[10%] w-[400px] h-[400px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.1), transparent 60%)" }}
         animate={{ x: [0, -35, 20, 0], y: [0, 25, -20, 0], scale: [1, 0.95, 1.08, 1] }}
         transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 4 }}
       />
       <motion.div
-        className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full"
+        className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.08), transparent 60%)" }}
         animate={{ x: [0, 20, -25, 0], y: [0, -35, 15, 0] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 7 }}
@@ -1278,10 +1276,10 @@ const ShiftSection = () => {
 
   return (
     <section ref={ref} className="relative overflow-hidden px-4 sm:px-6 py-16 sm:py-20 md:py-28">
-      <motion.div className="absolute inset-0" style={{ y: bgY }}>
+      <motion.div className="absolute inset-0 pointer-events-none" style={{ y: bgY }}>
         <img src={controlRoom} alt="" className="h-[120%] w-full object-cover opacity-10" />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background pointer-events-none" />
       <FloatingIcons icons={[Monitor, Users, Wrench, CheckCircle2, Star]} count={8} />
 
       <motion.div
@@ -1911,7 +1909,7 @@ const FinalCTA = () => {
     <section ref={ref} className="relative overflow-hidden px-4 sm:px-6 py-20 sm:py-28 md:py-32 lg:py-40">
       {/* Multi-layer animated background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ y: bgY }}
       >
         <div
@@ -1924,19 +1922,19 @@ const FinalCTA = () => {
 
       {/* Animated gradient orbs */}
       <motion.div
-        className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full"
+        className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.12), transparent 60%)" }}
         animate={{ x: [0, 50, -30, 0], y: [0, -40, 30, 0], scale: [1, 1.1, 0.95, 1] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full"
+        className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.08), transparent 60%)" }}
         animate={{ x: [0, -40, 25, 0], y: [0, 30, -25, 0], scale: [1, 0.95, 1.08, 1] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 5 }}
       />
       <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, hsl(216 90% 58% / 0.06), transparent 50%)" }}
         animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -1950,7 +1948,7 @@ const FinalCTA = () => {
 
       {/* Radial glow */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(216 90% 58% / 0.1), transparent 50%)" }}
       />
 
@@ -2009,17 +2007,17 @@ const FinalCTA = () => {
           <div className="relative">
             {/* Triple pulse rings */}
             <motion.div
-              className="absolute -inset-5 rounded-xl bg-primary/20 blur-md"
+              className="absolute -inset-5 rounded-xl bg-primary/20 blur-md pointer-events-none"
               animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0, 0.4] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
             />
             <motion.div
-              className="absolute -inset-5 rounded-xl bg-primary/15 blur-lg"
+              className="absolute -inset-5 rounded-xl bg-primary/15 blur-lg pointer-events-none"
               animate={{ scale: [1, 1.35, 1], opacity: [0.3, 0, 0.3] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 0.6 }}
             />
             <motion.div
-              className="absolute -inset-5 rounded-xl bg-primary/10 blur-xl"
+              className="absolute -inset-5 rounded-xl bg-primary/10 blur-xl pointer-events-none"
               animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0, 0.2] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 1.2 }}
             />

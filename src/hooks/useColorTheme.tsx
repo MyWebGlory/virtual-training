@@ -32,9 +32,7 @@ const VARS: Record<ColorTheme, Record<string, string>> = {
 };
 
 export function ColorThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ColorTheme>(() => {
-    return (localStorage.getItem("color-theme") as ColorTheme) || "blue";
-  });
+  const [theme, setThemeState] = useState<ColorTheme>("blue");
 
   const setTheme = (t: ColorTheme) => {
     setThemeState(t);
